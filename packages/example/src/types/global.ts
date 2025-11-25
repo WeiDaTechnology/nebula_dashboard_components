@@ -31,12 +31,12 @@ declare global {
       /** 组件 */
       component: React.ComponentType<any>
       /** 交互配置 */
-      interaction?: Array<{
+      interaction?: {
         /** 交互标题 */
         title: string
         /** 事件配置 */
         eventConfigure: EventConfigure[]
-      }>
+      }
       /** 配置 */
       configure?: Configure
       /** 自定义设置器列表 */

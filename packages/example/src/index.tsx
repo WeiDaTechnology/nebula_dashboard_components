@@ -55,6 +55,15 @@ if (__RUN_ON_LOCAL__) {
 } else {
   window.registerGraphicCustomComponent?.({
     component: Container,
+    interaction: {
+      title: '交互',
+      eventConfigure: [
+        {
+          eventName: 'onClick',
+          displayName: '点击',
+        },
+      ],
+    },
     configure,
     setter: [ExampleSetter],
   })
