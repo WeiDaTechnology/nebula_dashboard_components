@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "target": "ESNext",
+    "newLine": "LF",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "strictNullChecks": true
+  },
+  "exclude": ["node_modules", "dist"]
+}

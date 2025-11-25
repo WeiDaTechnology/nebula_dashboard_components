@@ -1,13 +1,12 @@
 {
-  "extends": "./node_modules/@metacode/lint/tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./*"
-      ]
-    }
-  }
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
+    },
+    "strictNullChecks": true
+  },
+  "include": ["./src"]
 }

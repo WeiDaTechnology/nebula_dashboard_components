@@ -1,1 +1,0 @@
-export * from './setter1/index'
