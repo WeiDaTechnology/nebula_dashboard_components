@@ -155,10 +155,12 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     mainLayout: css`
       display: flex;
       gap: 16px;
-      min-height: 500px;
+      height: 500px;
 
       @media (max-width: 768px) {
         flex-direction: column;
+        height: auto;
+        min-height: 500px;
       }
     `,
     leftPanel: css`
@@ -176,7 +178,23 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      height: 100%;
       overflow-y: auto;
+    `,
+    chartContainer: css`
+      flex: 1;
+      background: rgba(15, 25, 40, 0.6);
+      border: 1px solid rgba(64, 150, 255, 0.15);
+      border-radius: 4px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      @media (max-width: 768px) {
+        min-height: 180px;
+        flex: none;
+      }
     `,
     dataGrid: css`
       display: grid;

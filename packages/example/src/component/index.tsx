@@ -163,7 +163,6 @@ const Component: React.FC<ComponentProps> = props => {
 
   useEffect(() => {
     const handler = () => {
-
       const element = BlackHole3D?.Probe?.getCurCombProbeRet().elemId
 
       if (deviceMap.includes(element)) {
