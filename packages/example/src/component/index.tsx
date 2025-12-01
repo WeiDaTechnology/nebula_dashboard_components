@@ -1,3 +1,4 @@
+// @ts-ignore
 import Cookies from 'js-cookie'
 import type * as React from 'react'
 import { useEffect, useState } from 'react'
@@ -163,7 +164,6 @@ const Component: React.FC<ComponentProps> = props => {
 
   useEffect(() => {
     const handler = () => {
-
       const element = BlackHole3D?.Probe?.getCurCombProbeRet().elemId
 
       if (deviceMap.includes(element)) {
@@ -179,7 +179,7 @@ const Component: React.FC<ComponentProps> = props => {
     }
   }, [])
 
-  async function getStationInfo() {
+  function getStationInfo() {
     const companyId = localStorage.getItem('companyId')
     const token = Cookies.get('token')
     if (deviceId === deviceMap[0]) {
