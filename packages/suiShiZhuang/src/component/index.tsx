@@ -78,6 +78,7 @@ type dataItem = {
   下贯速度: string
   设备状态: string
   平台倾角X: string
+  chartData?: ChartDataItem[]  // 图表数据
 }
 
 // 图表数据点类型
@@ -93,7 +94,66 @@ interface ChartsData {
   current: ChartDataPoint[]    // 电流量数据
 }
 
-// 生成模拟图表数据
+// {
+//         "half_hour_interval": "2025-11-20 22:00:00",
+//         "桩号": "S11-1-12",
+//         "电流": 177.25,
+//         "频率": 17.7,
+//         "深度": 32,
+//         "填料量": 12.3
+//     }
+type ChartDataItem = {
+    "half_hour_interval": string,
+    "桩号": string,
+    "电流": number,
+    "频率": number,
+    "深度": number,
+    "填料量": number
+}
+// 将API返回的图表数据转换为ECharts需要的格式
+function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
+  // 如果没有数据，返回空数组
+  if (!chartDataItems || chartDataItems.length === 0) {
+    return {
+      depth: [],
+      volume: [],
+      current: []
+    }
+  }
+
+  // 转换数据格式
+  const depth: ChartDataPoint[] = []
+  const volume: ChartDataPoint[] = []
+  const current: ChartDataPoint[] = []
+
+  chartDataItems.forEach(item => {
+    // 格式化时间 (从 "2025-11-20 22:00:00" 提取时间部分)
+    const time = item.half_hour_interval.split(' ')[1] || item.half_hour_interval
+
+    depth.push({
+      time,
+      value: item.深度 || 0
+    })
+
+    volume.push({
+      time,
+      value: item.填料量 || 0
+    })
+
+    current.push({
+      time,
+      value: item.电流 || 0
+    })
+  })
+
+  return {
+    depth,
+    volume,
+    current
+  }
+}
+
+// 生成模拟图表数据（作为备用）
 function generateMockChartsData(): ChartsData {
   const timePoints: string[] = []
   const now = new Date()
@@ -140,7 +200,7 @@ function generateMockChartsData(): ChartsData {
     skipErrorThrower: true
   })
      */
-async function fetchData(childNodeId: string, dataSetId: string) {
+async function fetchData(childNodeId: string, dataSetId: string): Promise<dataItem | null> {
   const elementParam: any = await window.core.request('bjgraphicplatform/project/element/getElementParam', {
     data: {
       dataSetId: dataSetId,
@@ -149,34 +209,63 @@ async function fetchData(childNodeId: string, dataSetId: string) {
     autoBoxParam: false,
     skipErrorThrower: true,
   })
-  const zhuanghao = elementParam?.elementParams
+  let zhuanghao = elementParam?.elementParams
     ?.find?.((e: any) => e.group === '用户定义属性')
     ?.data?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
 
+  zhuanghao = 'S11-1-12'
   if (!zhuanghao) {
     return null
   }
+  let shebei = ''
+  const map: Record<string, string> = {
+    'fe8d03a9145e4df69a1f402f1a5cecb9': "029e5b0183f8472fb20e7689fe245422",
+    'a32e9cd0ab3244eb94fa61e6ce5fa623': "ff40511b887f4f62859f229e43348bfb",
+    'f7d110b01e114b76adbee5b1a3b3e9e4': "e47e9185b3d54ad7b7727344bbb0bdf9",
+    'f6fba8efa2514d6d8515574aa941b607': "0a3e3ace0ef84630b479fb14e366ef7e"
+  }
   const a = [
-    'fe8d03a9145e4df69a1f402f1a5cecb9',
-    'a32e9cd0ab3244eb94fa61e6ce5fa623',
-    'f6fba8efa2514d6d8515574aa941b607',
-    'f7d110b01e114b76adbee5b1a3b3e9e4',
+    'fe8d03a9145e4df69a1f402f1a5cecb9',// 4 "029e5b0183f8472fb20e7689fe245422"
+    'a32e9cd0ab3244eb94fa61e6ce5fa623',// 3 "ff40511b887f4f62859f229e43348bfb"
+    'f6fba8efa2514d6d8515574aa941b607',// 1 "e47e9185b3d54ad7b7727344bbb0bdf9"
+    'f7d110b01e114b76adbee5b1a3b3e9e4',// 2 "0a3e3ace0ef84630b479fb14e366ef7e"
   ].map(datasetId => {
     return async () => {
       const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
         data: {
           dataSetUuid: datasetId,
           params: {
-            // "zhaunghao": zhuanghao
-            zhaunghao: 'S11-1-12',
+            "zhaunghao": zhuanghao
           },
         },
       })
+      if(response.data?.[0]) {
+        shebei = datasetId
+      }
       return response.data?.[0]
     }
   })
   const b = await Promise.all(a.map(e => e()))
-  return b.find(e => !!e)
+  const foundData = b.find(e => !!e)
+  
+  if (!foundData) {
+    return null
+  }
+
+  // 获取图表数据
+  const x: { data: ChartDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+    data: {
+      dataSetUuid: map[shebei],
+      params: {
+        zhuanghao: zhuanghao,
+      },
+    },
+  })
+
+  return {
+    ...foundData,
+    chartData: x.data
+  }
 }
 
 const Component: React.FC<ComponentProps> = props => {
@@ -219,8 +308,34 @@ const Component: React.FC<ComponentProps> = props => {
     title: string,
     data: ChartDataPoint[],
     unit: string,
-    yAxisMax?: number
+    options?: {
+      yAxisMin?: number
+      yAxisMax?: number
+      autoScale?: boolean
+    }
   ) => {
+    // 自动计算 Y 轴范围
+    let yMin = options?.yAxisMin
+    let yMax = options?.yAxisMax
+
+    if (options?.autoScale && data.length > 0) {
+      const values = data.map(d => d.value)
+      const dataMin = Math.min(...values)
+      const dataMax = Math.max(...values)
+      const range = dataMax - dataMin
+      
+      // 如果数据变化很小，使用固定范围
+      if (range < 1) {
+        yMin = Math.floor(dataMin - 2)
+        yMax = Math.ceil(dataMax + 2)
+      } else {
+        // 添加 10% 的边距
+        const margin = range * 0.1
+        yMin = Math.floor(dataMin - margin)
+        yMax = Math.ceil(dataMax + margin)
+      }
+    }
+
     return {
       title: {
         text: title,
@@ -259,7 +374,9 @@ const Component: React.FC<ComponentProps> = props => {
       },
       yAxis: {
         type: 'value',
-        max: yAxisMax,
+        min: yMin,
+        max: yMax,
+        scale: true,
         axisLine: {
           show: false
         },
@@ -339,17 +456,26 @@ const Component: React.FC<ComponentProps> = props => {
 
   // 使用 useMemo 优化图表配置
   const depthChartOption = useMemo(
-    () => createChartOption('深度（m）', chartsData.depth, 'm', 25),
+    () => createChartOption('深度（m）', chartsData.depth, 'm', {
+      autoScale: true,  // 自动缩放
+      yAxisMin: 0       // 最小值从0开始
+    }),
     [chartsData.depth]
   )
 
   const volumeChartOption = useMemo(
-    () => createChartOption('填料量（m³）', chartsData.volume, 'm³', 300),
+    () => createChartOption('填料量（m³）', chartsData.volume, 'm³', {
+      autoScale: true,  // 自动缩放
+      yAxisMin: 0       // 最小值从0开始
+    }),
     [chartsData.volume]
   )
 
   const currentChartOption = useMemo(
-    () => createChartOption('电流量（A）', chartsData.current, 'A', 60),
+    () => createChartOption('电流量（A）', chartsData.current, 'A', {
+      autoScale: true,  // 自动缩放
+      yAxisMin: 0       // 最小值从0开始
+    }),
     [chartsData.current]
   )
 
@@ -365,9 +491,9 @@ const Component: React.FC<ComponentProps> = props => {
       // 如果获取到数据，设置到状态并显示弹窗
       if (data) {
         setStationInfo(data)
-        // 生成模拟图表数据
-        const mockCharts = generateMockChartsData()
-        setChartsData(mockCharts)
+        // 使用真实图表数据，如果没有则使用模拟数据作为备用
+        const realCharts = data.chartData ? convertChartData(data.chartData) : generateMockChartsData()
+        setChartsData(realCharts)
         setInternalVisible(true)
       }
     }
