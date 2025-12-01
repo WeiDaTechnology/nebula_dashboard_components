@@ -6,6 +6,12 @@ import Component from './component/index'
 
 declare const __RUN_ON_LOCAL__: boolean
 
+declare global {
+  interface Window {
+    GraphicCustomComponent: React.FC<ContainerProps>
+  }
+}
+
 export interface ContainerProps {
   /** 组件id */
   __id?: string
@@ -47,29 +53,7 @@ function LocalTestWrapper() {
 }
 
 export default function Container(props: ContainerProps) {
-  const { style } = props
-
-  return (
-    <div
-      style={
-        __RUN_ON_LOCAL__
-          ? {
-              width: '100%',
-              height: '100vh',
-            }
-          : {
-              ...style,
-              backgroundColor: 'transparent',
-              left: 0,
-              top: 0,
-              display: 'flex',
-              transform: `translate(${style?.left}px, ${style?.top}px)`,
-            }
-      }
-    >
-      <Component {...props} />
-    </div>
-  )
+  return <Component {...props} />
 }
 
 if (__RUN_ON_LOCAL__) {

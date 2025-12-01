@@ -5,6 +5,7 @@ import type { ContainerProps } from '..'
 import useStyles from './styles'
 
 declare const BlackHole3D: any
+declare const __RUN_ON_LOCAL__: boolean
 
 interface ComponentProps extends ContainerProps {
   /** 弹窗标题 */
@@ -504,115 +505,132 @@ const Component: React.FC<ComponentProps> = props => {
       document.removeEventListener('RESystemSelShpElement', RESystemSelElement)
     }
   }, [])
-
-  if (!visible) {
-    return null
-  }
-
   return (
-    <div className={styles.modalOverlay} onClick={handleClose}>
-      <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
-        {/* 标题栏 */}
-        <div className={styles.header}>
-          <div className={styles.statusIndicator}>
-            <span className={styles.statusDot} style={{ backgroundColor: isOnline ? '#52c41a' : '#ff4d4f' }} />
-            <span className={styles.statusText}>在线</span>
-          </div>
-          <h2 className={styles.title}>{title}</h2>
-          <div className={styles.rightActions}>
-            <span className={styles.trophyIcon}>🏆</span>
-            <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
-              ×
-            </button>
-          </div>
-        </div>
-
-        {/* 内容区域 */}
-        <div className={styles.content}>
-          <div className={styles.mainLayout}>
-            {/* 左侧数据列表 */}
-            <div className={styles.leftPanel}>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>设备号</span>
-                <span className={styles.value}>{stationInfo?.['设备号'] || '/'}</span>
+    visible && (
+      <div
+        style={
+          __RUN_ON_LOCAL__
+            ? {
+                width: '100%',
+                height: '100vh',
+              }
+            : {
+                ...style,
+                width: '900px',
+                height: '443px',
+                backgroundColor: 'transparent',
+                left: 0,
+                top: 0,
+                display: 'flex',
+                transform: `translate(${style?.left}px, ${style?.top}px)`,
+              }
+        }
+      >
+        <div className={styles.modalOverlay} onClick={handleClose}>
+          <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
+            {/* 标题栏 */}
+            <div className={styles.header}>
+              <div className={styles.statusIndicator}>
+                <span className={styles.statusDot} style={{ backgroundColor: isOnline ? '#52c41a' : '#ff4d4f' }} />
+                <span className={styles.statusText}>在线</span>
               </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>桩号</span>
-                <span className={styles.value}>{stationInfo?.['桩号'] || '/'}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>成孔起止时间（时间区间）</span>
-                <span className={styles.value}>{stationInfo?.['成孔起止时间'] || '/'}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>设计框顶</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['设计桩顶'], 'm')}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>设计框底</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['设计桩底'], 'm')}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>实际框顶</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['实际桩顶'], 'm')}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>实际框底</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['实际桩底'], 'm')}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>设计坐标X</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['设计坐标X'])}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>设计坐标Y</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['设计坐标Y'])}</span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>成桩深度</span>
-                <span className={styles.value}>
-                  {formatValue(stationInfo?.['成桩深度'] || stationInfo?.['real_height'], 'm')}
-                </span>
-              </div>
-              <div className={styles.dataItem}>
-                <span className={styles.label}>累计加料体积</span>
-                <span className={styles.value}>{formatValue(stationInfo?.['累计加料体积'], 'm³')}</span>
+              <h2 className={styles.title}>{title}</h2>
+              <div className={styles.rightActions}>
+                <span className={styles.trophyIcon}>🏆</span>
+                <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
+                  ×
+                </button>
               </div>
             </div>
 
-            {/* 右侧图表区域 */}
-            <div className={styles.rightPanel}>
-              {/* 深度图表 */}
-              <div className={styles.chartContainer}>
-                <ReactECharts
-                  option={depthChartOption}
-                  style={{ height: '100%', width: '100%' }}
-                  opts={{ renderer: 'canvas' }}
-                />
-              </div>
+            {/* 内容区域 */}
+            <div className={styles.content}>
+              <div className={styles.mainLayout}>
+                {/* 左侧数据列表 */}
+                <div className={styles.leftPanel}>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>设备号</span>
+                    <span className={styles.value}>{stationInfo?.['设备号'] || '/'}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>桩号</span>
+                    <span className={styles.value}>{stationInfo?.['桩号'] || '/'}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>成孔起止时间（时间区间）</span>
+                    <span className={styles.value}>{stationInfo?.['成孔起止时间'] || '/'}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>设计框顶</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['设计桩顶'], 'm')}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>设计框底</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['设计桩底'], 'm')}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>实际框顶</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['实际桩顶'], 'm')}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>实际框底</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['实际桩底'], 'm')}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>设计坐标X</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['设计坐标X'])}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>设计坐标Y</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['设计坐标Y'])}</span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>成桩深度</span>
+                    <span className={styles.value}>
+                      {formatValue(stationInfo?.['成桩深度'] || stationInfo?.['real_height'], 'm')}
+                    </span>
+                  </div>
+                  <div className={styles.dataItem}>
+                    <span className={styles.label}>累计加料体积</span>
+                    <span className={styles.value}>{formatValue(stationInfo?.['累计加料体积'], 'm³')}</span>
+                  </div>
+                </div>
 
-              {/* 填料量图表 */}
-              <div className={styles.chartContainer}>
-                <ReactECharts
-                  option={volumeChartOption}
-                  style={{ height: '100%', width: '100%' }}
-                  opts={{ renderer: 'canvas' }}
-                />
-              </div>
+                {/* 右侧图表区域 */}
+                <div className={styles.rightPanel}>
+                  {/* 深度图表 */}
+                  <div className={styles.chartContainer}>
+                    <ReactECharts
+                      option={depthChartOption}
+                      style={{ height: '100%', width: '100%' }}
+                      opts={{ renderer: 'canvas' }}
+                    />
+                  </div>
 
-              {/* 电流量图表 */}
-              <div className={styles.chartContainer}>
-                <ReactECharts
-                  option={currentChartOption}
-                  style={{ height: '100%', width: '100%' }}
-                  opts={{ renderer: 'canvas' }}
-                />
+                  {/* 填料量图表 */}
+                  <div className={styles.chartContainer}>
+                    <ReactECharts
+                      option={volumeChartOption}
+                      style={{ height: '100%', width: '100%' }}
+                      opts={{ renderer: 'canvas' }}
+                    />
+                  </div>
+
+                  {/* 电流量图表 */}
+                  <div className={styles.chartContainer}>
+                    <ReactECharts
+                      option={currentChartOption}
+                      style={{ height: '100%', width: '100%' }}
+                      opts={{ renderer: 'canvas' }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    )
   )
 }
 
