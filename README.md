@@ -231,6 +231,125 @@ const useStyles = createStyles(({ css, token }) => ({
 }))
 ```
 
+### 5. 接口调用
+
+#### 5.1 内部接口调用
+
+对于内部接口，可以使用自带的 `request` 进行调用。`request` 函数会自动处理 URL 前缀，你只需要从服务路径开始拼接即可：
+
+**URL 映射规则：**
+
+- `https://nebula.weidax.com/graphapi/bjgraphicplatform/apiConfig/searchApi` → `request('graphapi/bjgraphicplatform/apiConfig/searchApi', {})`
+- `https://nebula.weidax.com/api/bjbusiness/bench/listAll` → `request('bjbusiness/bench/listAll', {})`
+
+**基本用法：**
+
+```tsx
+import { request } from '@/utils'
+
+// GET 请求
+const data = await request('bjbusiness/bench/listAll', {
+  method: 'GET',
+  params: { id: '123' },
+})
+
+// POST 请求
+const result = await request('bjgraphicplatform/apiConfig/searchApi', {
+  method: 'POST',
+  data: { keyword: 'test' },
+})
+```
+
+**配置选项：**
+
+`request` 函数的配置对象继承自 `AxiosRequestConfig`（支持所有 axios 的配置项），并额外提供了以下自定义配置：
+
+| 配置项               | 类型                                  | 默认值  | 说明                                                                                                 |
+| -------------------- | ------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| `autoBoxParam`       | `boolean`                             | `true`  | 自动在请求的 body 外围包一个 `param`，例如 `{ id: 'xxx' }` 会变为 `{ param: { id: 'xxx' } }`         |
+| `autoApiPrefix`      | `boolean`                             | `true`  | 自动在请求的 URL 前加一个 `api` 前缀，例如 `/platform/getById` 会变为 `/api/platform/getById`        |
+| `addToken`           | `boolean`                             | `true`  | 自动从 cookies 中获取 `token` 和 `companyId`，设置到 header 中                                       |
+| `setContentTypeJson` | `boolean`                             | `true`  | 自动在 header 设置 `content-type` 为 `application/json`                                              |
+| `skipErrorThrower`   | `boolean \| ((data: any) => boolean)` | `false` | 跳过自动错误抛出。设置为 `false` 时跳过，设置为函数时可动态决定是否抛出错误                          |
+| `skipErrorHandler`   | `boolean`                             | `false` | 跳过自动错误处理。设置为 `false` 时，直接抛出错误，不会进行额外处理（如 token 校验失败跳转登录页等） |
+
+**配置示例：**
+
+```tsx
+// 禁用自动包装 param
+await request('api/endpoint', {
+  method: 'POST',
+  data: { id: '123' },
+  autoBoxParam: false,
+})
+
+// 禁用自动添加 api 前缀
+await request('/api/custom/endpoint', {
+  method: 'GET',
+  autoApiPrefix: false,
+})
+
+// 自定义错误处理
+await request('api/endpoint', {
+  method: 'POST',
+  data: { id: '123' },
+  skipErrorThrower: data => {
+    // 根据返回值动态决定是否抛出错误
+    return data.code === 'CUSTOM_ERROR'
+  },
+  skipErrorHandler: true, // 跳过自动错误处理
+})
+```
+
+#### 5.2 外部接口调用
+
+对于外部接口，有两种调用方式：
+
+**方式一：直接使用 fetch**
+
+```tsx
+const response = await fetch('https://api.example.com/data', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ id: '123' }),
+})
+const data = await response.json()
+```
+
+**方式二：使用 executeApiCall 中转**
+
+通过 `executeApiCall` 函数可以调用外部接口，该函数会将请求转发到平台的中转服务：
+
+```tsx
+import { executeApiCall } from '@/services'
+
+const result = await executeApiCall({
+  url: 'https://api.example.com/data',
+  method: 'POST',
+  headers: new Headers({
+    'Content-Type': 'application/json',
+  }),
+  requestBody: new Headers({
+    // 请求体数据
+  }),
+  requestParam: new Headers({
+    // 请求参数
+  }),
+})
+```
+
+**executeApiCall 参数说明：**
+
+| 参数           | 类型      | 说明                                   |
+| -------------- | --------- | -------------------------------------- |
+| `url`          | `string`  | 外部接口的完整 URL                     |
+| `method`       | `string`  | HTTP 方法（GET、POST、PUT、DELETE 等） |
+| `headers`      | `Headers` | 请求头                                 |
+| `requestBody`  | `Headers` | 请求体数据                             |
+| `requestParam` | `Headers` | URL 查询参数                           |
+
 ## 📖 示例说明
 
 `packages/example` 目录包含一个完整的自定义组件示例，包括：
