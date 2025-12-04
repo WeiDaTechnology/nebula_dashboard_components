@@ -97,7 +97,7 @@ importers:
         specifier: 5.2.2
         version: 5.2.2(webpack-cli@6.0.1)(webpack@5.103.0)
 
-  packages/example:
+  packages/SanHangJu/SuiShiZhuang/GouJian:
     dependencies:
       '@reduxjs/toolkit':
         specifier: 2.11.0
@@ -120,6 +120,9 @@ importers:
       echarts:
         specifier: 6.0.0
         version: 6.0.0
+      echarts-for-react:
+        specifier: ^3.0.2
+        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
       js-cookie:
         specifier: 3.0.5
         version: 3.0.5
@@ -158,7 +161,7 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
 
-  packages/suiShiZhuang:
+  packages/SanHangJu/SuiShiZhuang/SheBei:
     dependencies:
       '@reduxjs/toolkit':
         specifier: 2.11.0
@@ -181,9 +184,6 @@ importers:
       echarts:
         specifier: 6.0.0
         version: 6.0.0
-      echarts-for-react:
-        specifier: ^3.0.2
-        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
       js-cookie:
         specifier: 3.0.5
         version: 3.0.5
@@ -1176,8 +1176,8 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  '@rc-component/qrcode@1.1.0':
-    resolution: {integrity: sha512-ABA80Yer0c6I2+moqNY0kF3Y1NxIT6wDP/EINIqbiRbfZKP1HtHpKMh8WuTXLgVGYsoWG2g9/n0PgM8KdnJb4Q==}
+  '@rc-component/qrcode@1.1.1':
+    resolution: {integrity: sha512-LfLGNymzKdUPjXUbRP+xOhIWY4jQ+YMj5MmWAcgcAq1Ij8XP7tRmAXqyuv96XvLUBE/5cA8hLFl9eO1JQMujrA==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -2436,8 +2436,8 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  immer@11.0.0:
-    resolution: {integrity: sha512-XtRG4SINt4dpqlnJvs70O2j6hH7H0X8fUzFsjMn1rwnETaxwp83HLNimXBjZ78MrKl3/d3/pkzDH0o0Lkxm37Q==}
+  immer@11.0.1:
+    resolution: {integrity: sha512-naDCyggtcBWANtIrjQEajhhBEuL9b0Zg4zmlWK2CzS6xCWSE39/vvf4LqnMjUAWHBhot4m9MHCM/Z+mfWhUkiA==}
 
   immutable@5.1.4:
     resolution: {integrity: sha512-p6u1bG3YSnINT5RQmx/yRZBpenIl30kVxkTLDyHLIMk0gict704Q9n+thfDI7lTRm9vXdDYutVzXhzcThxTnXA==}
@@ -5299,10 +5299,9 @@ snapshots:
       react: 18.1.0
       react-dom: 18.1.0(react@18.1.0)
 
-  '@rc-component/qrcode@1.1.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)':
+  '@rc-component/qrcode@1.1.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)':
     dependencies:
       '@babel/runtime': 7.28.4
-      classnames: 2.5.1
       react: 18.1.0
       react-dom: 18.1.0(react@18.1.0)
 
@@ -5331,7 +5330,7 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.0.0
       '@standard-schema/utils': 0.3.0
-      immer: 11.0.0
+      immer: 11.0.1
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
       reselect: 5.1.1
@@ -5770,7 +5769,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       '@rc-component/color-picker': 2.0.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       '@rc-component/mutate-observer': 1.1.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
-      '@rc-component/qrcode': 1.1.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      '@rc-component/qrcode': 1.1.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       '@rc-component/tour': 1.15.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       '@rc-component/trigger': 2.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       classnames: 2.5.1
@@ -6727,7 +6726,7 @@ snapshots:
   image-size@0.5.5:
     optional: true
 
-  immer@11.0.0: {}
+  immer@11.0.1: {}
 
   immutable@5.1.4: {}
 

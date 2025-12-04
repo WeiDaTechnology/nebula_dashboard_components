@@ -36,9 +36,14 @@ module.exports = {
 
   devServer: {
     port: 5010,
-    host: '127.0.0.1',
+    host: '0.0.0.0',
     allowedHosts: 'all',
-    headers: { 'Access-Control-Allow-Origin': '*' },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': 'X-Requested-With, content-type, Authorization',
+      'Access-Control-Allow-Private-Network': 'true',
+    },
     historyApiFallback: true,
     hot: true,
     client: {

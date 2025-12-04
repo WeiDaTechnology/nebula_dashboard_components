@@ -129,6 +129,7 @@ const Component: React.FC<ComponentProps> = props => {
   const { style, title = 'DWADRTO1', isOnline = true, visible: controlledVisible, onClose } = props
   const { styles } = useStyles()
 
+  console.log(">>>>>> ")
   const [internalVisible, setInternalVisible] = useState(false)
   const [stationInfo, setStationInfo] = useState<any>({})
   const [deviceId, setDeviceId] = useState<string | null>(null)
