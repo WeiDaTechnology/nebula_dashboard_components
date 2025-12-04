@@ -5,7 +5,7 @@ const _MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 const isRunOnLocal = process.env.RUN_ON_LOCAL === 'true'
-console.log('>>> isRunOnLocal', isRunOnLocal)
+
 module.exports = {
   mode: 'development',
   entry: {

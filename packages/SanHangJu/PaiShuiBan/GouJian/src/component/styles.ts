@@ -40,11 +40,10 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     modalContainer: css`
       position: relative;
       width: 100%;
-      /* 与 index.tsx 中的 1000px 宽度保持一致 */
-      max-width: 1000px;
+      max-width: 1360px;
       background: #0b3658;
-      border: 1px solid rgba(90, 180, 255, 0.6);
-      border-radius: 8px;
+      border: 1px solid rgba(64, 150, 255, 0.3);
+      border-radius: 6px;
       box-shadow:
         0 4px 16px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -71,30 +70,30 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px;
-      background: #0b3658;
-      border-bottom: 1px solid rgba(90, 180, 255, 0.5);
+      padding: 12px 18px;
+      background: linear-gradient(90deg, rgba(20, 40, 60, 0.8) 0%, rgba(15, 30, 50, 0.8) 100%);
+      border-bottom: 1px solid rgba(64, 150, 255, 0.2);
       position: relative;
-      min-height: 44px;
+      min-height: 36px;
     `,
     statusIndicator: css`
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
       position: absolute;
-      left: 16px;
+      left: 12px;
     `,
     statusDot: css`
-      width: 12px;
-      height: 12px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       display: inline-block;
-      box-shadow: 0 0 8px currentColor;
+      box-shadow: 0 0 5px currentColor;
       animation: pulse 2s ease-in-out infinite;
     `,
     statusText: css`
       color: #fff;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       user-select: none;
     `,
@@ -117,7 +116,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       gap: 5px;
     `,
     trophyIcon: css`
-      font-size: 18px;
+      font-size: 14px;
       line-height: 1;
       filter: drop-shadow(0 0 1px rgba(255, 215, 0, 0.5));
       user-select: none;
@@ -126,12 +125,12 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 22px;
+      font-size: 18px;
       line-height: 1;
       cursor: pointer;
       padding: 0;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -148,7 +147,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       }
     `,
     content: css`
-      padding: 16px;
+      padding: 16px 18px 18px;
       flex: 1;
       overflow-y: auto;
       user-select: none;
@@ -156,8 +155,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     mainLayout: css`
       display: flex;
       gap: 18px;
-      /* index.tsx 中内容高度约 650px，减去头部与上下内边距后，预留 500px 给主体 */
-      height: 500px;
+      height: 480px;
 
       @media (max-width: 768px) {
         flex-direction: column;
@@ -201,11 +199,11 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     dataGrid: css`
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
 
       @media (max-width: 500px) {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px;
       }
     `,
     dataColumn: css`
@@ -218,8 +216,8 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       justify-content: space-between;
       align-items: center;
       padding: 9px 12px;
-      background: rgba(11, 54, 88, 0.8);
-      border: 1px solid rgba(90, 180, 255, 0.4);
+      background: rgba(15, 25, 40, 0.6);
+      border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 3px;
       pointer-events: none;
     `,
@@ -233,10 +231,10 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     value: css`
       color: #fff;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       text-align: right;
       text-shadow: 0 0 3px rgba(64, 150, 255, 0.3);
-      min-width: 80px;
+      min-width: 70px;
       user-select: none;
     `,
     // 保留原有的样式以兼容
