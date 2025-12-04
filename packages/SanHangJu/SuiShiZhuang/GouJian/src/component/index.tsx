@@ -1,6 +1,6 @@
+import ReactECharts from 'echarts-for-react'
 import type * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import ReactECharts from 'echarts-for-react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
 
@@ -101,7 +101,7 @@ type dataItem = {
   下贯速度: string
   设备状态: string
   平台倾角X: string
-  chartData?: ChartDataItem[]  // 图表数据
+  chartData?: ChartDataItem[] // 图表数据
 }
 
 // 图表数据点类型
@@ -112,9 +112,9 @@ interface ChartDataPoint {
 
 // 图表数据集合类型
 interface ChartsData {
-  depth: ChartDataPoint[]      // 深度数据
-  volume: ChartDataPoint[]     // 填料量数据
-  current: ChartDataPoint[]    // 电流量数据
+  depth: ChartDataPoint[] // 深度数据
+  volume: ChartDataPoint[] // 填料量数据
+  current: ChartDataPoint[] // 电流量数据
 }
 
 // {
@@ -126,12 +126,12 @@ interface ChartsData {
 //         "填料量": 12.3
 //     }
 type ChartDataItem = {
-    "half_hour_interval": string,
-    "桩号": string,
-    "电流": number,
-    "频率": number,
-    "深度": number,
-    "填料量": number
+  half_hour_interval: string
+  桩号: string
+  电流: number
+  频率: number
+  深度: number
+  填料量: number
 }
 // 将API返回的图表数据转换为ECharts需要的格式
 function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
@@ -140,7 +140,7 @@ function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
     return {
       depth: [],
       volume: [],
-      current: []
+      current: [],
     }
   }
 
@@ -155,24 +155,24 @@ function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
 
     depth.push({
       time,
-      value: item.深度 || 0
+      value: item.深度 || 0,
     })
 
     volume.push({
       time,
-      value: item.填料量 || 0
+      value: item.填料量 || 0,
     })
 
     current.push({
       time,
-      value: item.电流 || 0
+      value: item.电流 || 0,
     })
   })
 
   return {
     depth,
     volume,
-    current
+    current,
   }
 }
 
@@ -180,35 +180,37 @@ function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
 function generateMockChartsData(): ChartsData {
   const timePoints: string[] = []
   const now = new Date()
-  
+
   // 生成12个时间点
   for (let i = 11; i >= 0; i--) {
     const time = new Date(now.getTime() - i * 5 * 60 * 1000) // 每5分钟一个点
-    timePoints.push(`${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}`)
+    timePoints.push(
+      `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}:${time.getSeconds().toString().padStart(2, '0')}`,
+    )
   }
 
   // 生成深度数据（5-20m范围）
   const depthData: ChartDataPoint[] = timePoints.map((time, index) => ({
     time,
-    value: Number((10 + Math.sin(index * 0.5) * 5 + Math.random() * 2).toFixed(2))
+    value: Number((10 + Math.sin(index * 0.5) * 5 + Math.random() * 2).toFixed(2)),
   }))
 
   // 生成填料量数据（50-250m³范围）
   const volumeData: ChartDataPoint[] = timePoints.map((time, index) => ({
     time,
-    value: Number((150 + Math.sin(index * 0.4) * 50 + Math.random() * 20).toFixed(2))
+    value: Number((150 + Math.sin(index * 0.4) * 50 + Math.random() * 20).toFixed(2)),
   }))
 
   // 生成电流量数据（20-50A范围，双波形）
   const currentData: ChartDataPoint[] = timePoints.map((time, index) => ({
     time,
-    value: Number((35 + Math.sin(index * 0.8) * 10 + Math.cos(index * 0.6) * 5).toFixed(2))
+    value: Number((35 + Math.sin(index * 0.8) * 10 + Math.cos(index * 0.6) * 5).toFixed(2)),
   }))
 
   return {
     depth: depthData,
     volume: volumeData,
-    current: currentData
+    current: currentData,
   }
 }
 /**
@@ -226,13 +228,13 @@ function generateMockChartsData(): ChartsData {
 async function fetchData(childNodeId: string, dataSetId: string): Promise<dataItem | null> {
   const elementParam: any = await window.core.request('bjgraphicplatform/project/element/getElementParam', {
     data: {
-      dataSetId: dataSetId,
-      childNodeId: childNodeId,
+      dataSetId,
+      childNodeId,
     },
     autoBoxParam: false,
     skipErrorThrower: true,
   })
-  let zhuanghao = elementParam?.elementParams
+  const zhuanghao = elementParam?.elementParams
     ?.find?.((e: any) => e.group === '用户定义属性')
     ?.data?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
 
@@ -242,35 +244,33 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
   }
   let shebei = ''
   const map: Record<string, string> = {
-    'fe8d03a9145e4df69a1f402f1a5cecb9': "029e5b0183f8472fb20e7689fe245422",
-    'a32e9cd0ab3244eb94fa61e6ce5fa623': "ff40511b887f4f62859f229e43348bfb",
-    'f7d110b01e114b76adbee5b1a3b3e9e4': "e47e9185b3d54ad7b7727344bbb0bdf9",
-    'f6fba8efa2514d6d8515574aa941b607': "0a3e3ace0ef84630b479fb14e366ef7e"
+    fe8d03a9145e4df69a1f402f1a5cecb9: '029e5b0183f8472fb20e7689fe245422',
+    a32e9cd0ab3244eb94fa61e6ce5fa623: 'ff40511b887f4f62859f229e43348bfb',
+    f7d110b01e114b76adbee5b1a3b3e9e4: 'e47e9185b3d54ad7b7727344bbb0bdf9',
+    f6fba8efa2514d6d8515574aa941b607: '0a3e3ace0ef84630b479fb14e366ef7e',
   }
   const a = [
-    'fe8d03a9145e4df69a1f402f1a5cecb9',// 4 "029e5b0183f8472fb20e7689fe245422"
-    'a32e9cd0ab3244eb94fa61e6ce5fa623',// 3 "ff40511b887f4f62859f229e43348bfb"
-    'f6fba8efa2514d6d8515574aa941b607',// 1 "e47e9185b3d54ad7b7727344bbb0bdf9"
-    'f7d110b01e114b76adbee5b1a3b3e9e4',// 2 "0a3e3ace0ef84630b479fb14e366ef7e"
-  ].map(datasetId => {
-    return async () => {
-      const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
-        data: {
-          dataSetUuid: datasetId,
-          params: {
-            "zhaunghao": zhuanghao
-          },
+    'fe8d03a9145e4df69a1f402f1a5cecb9', // 4 "029e5b0183f8472fb20e7689fe245422"
+    'a32e9cd0ab3244eb94fa61e6ce5fa623', // 3 "ff40511b887f4f62859f229e43348bfb"
+    'f6fba8efa2514d6d8515574aa941b607', // 1 "e47e9185b3d54ad7b7727344bbb0bdf9"
+    'f7d110b01e114b76adbee5b1a3b3e9e4', // 2 "0a3e3ace0ef84630b479fb14e366ef7e"
+  ].map(datasetId => async () => {
+    const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+      data: {
+        dataSetUuid: datasetId,
+        params: {
+          zhaunghao: zhuanghao,
         },
-      })
-      if(response.data?.[0]) {
-        shebei = datasetId
-      }
-      return response.data?.[0]
+      },
+    })
+    if (response.data?.[0]) {
+      shebei = datasetId
     }
+    return response.data?.[0]
   })
   const b = await Promise.all(a.map(e => e()))
   const foundData = b.find(e => !!e)
-  
+
   if (!foundData) {
     return null
   }
@@ -280,14 +280,14 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     data: {
       dataSetUuid: map[shebei],
       params: {
-        zhuanghao: zhuanghao,
+        zhuanghao,
       },
     },
   })
 
   return {
     ...foundData,
-    chartData: x.data
+    chartData: x.data,
   }
 }
 
@@ -301,7 +301,7 @@ const Component: React.FC<ComponentProps> = props => {
   const [chartsData, setChartsData] = useState<ChartsData>({
     depth: [],
     volume: [],
-    current: []
+    current: [],
   })
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
@@ -335,7 +335,7 @@ const Component: React.FC<ComponentProps> = props => {
       yAxisMin?: number
       yAxisMax?: number
       autoScale?: boolean
-    }
+    },
   ) => {
     // 自动计算 Y 轴范围
     let yMin = options?.yAxisMin
@@ -346,7 +346,7 @@ const Component: React.FC<ComponentProps> = props => {
       const dataMin = Math.min(...values)
       const dataMax = Math.max(...values)
       const range = dataMax - dataMin
-      
+
       // 如果数据变化很小，使用固定范围
       if (range < 1) {
         yMin = Math.floor(dataMin - 2)
@@ -367,33 +367,33 @@ const Component: React.FC<ComponentProps> = props => {
         textStyle: {
           color: '#fff',
           fontSize: 16,
-          fontWeight: 500
-        }
+          fontWeight: 500,
+        },
       },
       grid: {
         left: '50',
         right: '20',
         top: '50',
         bottom: '40',
-        containLabel: false
+        containLabel: false,
       },
       xAxis: {
         type: 'category',
         data: data.map(d => d.time),
         axisLine: {
           lineStyle: {
-            color: 'rgba(90, 159, 184, 0.5)'
-          }
+            color: 'rgba(90, 159, 184, 0.5)',
+          },
         },
         axisLabel: {
           color: '#fff',
           fontSize: 12,
           rotate: 45,
-          interval: 0
+          interval: 0,
         },
         axisTick: {
-          show: false
-        }
+          show: false,
+        },
       },
       yAxis: {
         type: 'value',
@@ -401,21 +401,21 @@ const Component: React.FC<ComponentProps> = props => {
         max: yMax,
         scale: true,
         axisLine: {
-          show: false
+          show: false,
         },
         axisTick: {
-          show: false
+          show: false,
         },
         axisLabel: {
           color: '#fff',
-          fontSize: 12
+          fontSize: 12,
         },
         splitLine: {
           lineStyle: {
             color: 'rgba(90, 159, 184, 0.1)',
-            type: 'dashed'
-          }
-        }
+            type: 'dashed',
+          },
+        },
       },
       series: [
         {
@@ -424,10 +424,10 @@ const Component: React.FC<ComponentProps> = props => {
           smooth: true,
           lineStyle: {
             color: '#4dd9ff',
-            width: 2
+            width: 2,
           },
           itemStyle: {
-            color: '#4dd9ff'
+            color: '#4dd9ff',
           },
           areaStyle: {
             color: {
@@ -439,14 +439,14 @@ const Component: React.FC<ComponentProps> = props => {
               colorStops: [
                 {
                   offset: 0,
-                  color: 'rgba(77, 217, 255, 0.3)'
+                  color: 'rgba(77, 217, 255, 0.3)',
                 },
                 {
                   offset: 1,
-                  color: 'rgba(77, 217, 255, 0.05)'
-                }
-              ]
-            }
+                  color: 'rgba(77, 217, 255, 0.05)',
+                },
+              ],
+            },
           },
           symbol: 'circle',
           symbolSize: 4,
@@ -455,10 +455,10 @@ const Component: React.FC<ComponentProps> = props => {
             itemStyle: {
               color: '#4dd9ff',
               borderColor: '#fff',
-              borderWidth: 2
-            }
-          }
-        }
+              borderWidth: 2,
+            },
+          },
+        },
       ],
       tooltip: {
         trigger: 'axis',
@@ -467,39 +467,42 @@ const Component: React.FC<ComponentProps> = props => {
         borderWidth: 1,
         textStyle: {
           color: '#fff',
-          fontSize: 13
+          fontSize: 13,
         },
         formatter: (params: any) => {
           const param = params[0]
           return `${param.name}<br/>${param.seriesName || title}: ${param.value}${unit}`
-        }
-      }
+        },
+      },
     }
   }
 
   // 使用 useMemo 优化图表配置
   const depthChartOption = useMemo(
-    () => createChartOption('深度（m）', chartsData.depth, 'm', {
-      autoScale: true,  // 自动缩放
-      yAxisMin: 0       // 最小值从0开始
-    }),
-    [chartsData.depth]
+    () =>
+      createChartOption('深度（m）', chartsData.depth, 'm', {
+        autoScale: true, // 自动缩放
+        yAxisMin: 0, // 最小值从0开始
+      }),
+    [chartsData.depth],
   )
 
   const volumeChartOption = useMemo(
-    () => createChartOption('填料量（m³）', chartsData.volume, 'm³', {
-      autoScale: true,  // 自动缩放
-      yAxisMin: 0       // 最小值从0开始
-    }),
-    [chartsData.volume]
+    () =>
+      createChartOption('填料量（m³）', chartsData.volume, 'm³', {
+        autoScale: true, // 自动缩放
+        yAxisMin: 0, // 最小值从0开始
+      }),
+    [chartsData.volume],
   )
 
   const currentChartOption = useMemo(
-    () => createChartOption('电流量（A）', chartsData.current, 'A', {
-      autoScale: true,  // 自动缩放
-      yAxisMin: 0       // 最小值从0开始
-    }),
-    [chartsData.current]
+    () =>
+      createChartOption('电流量（A）', chartsData.current, 'A', {
+        autoScale: true, // 自动缩放
+        yAxisMin: 0, // 最小值从0开始
+      }),
+    [chartsData.current],
   )
 
   useEffect(() => {
@@ -620,8 +623,8 @@ const Component: React.FC<ComponentProps> = props => {
                   <div className={styles.chartContainer}>
                     <ReactECharts
                       option={depthChartOption}
-                      style={{ height: '100%', width: '100%' }}
                       opts={{ renderer: 'canvas' }}
+                      style={{ height: '100%', width: '100%' }}
                     />
                   </div>
 
@@ -629,8 +632,8 @@ const Component: React.FC<ComponentProps> = props => {
                   <div className={styles.chartContainer}>
                     <ReactECharts
                       option={volumeChartOption}
-                      style={{ height: '100%', width: '100%' }}
                       opts={{ renderer: 'canvas' }}
+                      style={{ height: '100%', width: '100%' }}
                     />
                   </div>
 
@@ -638,8 +641,8 @@ const Component: React.FC<ComponentProps> = props => {
                   <div className={styles.chartContainer}>
                     <ReactECharts
                       option={currentChartOption}
-                      style={{ height: '100%', width: '100%' }}
                       opts={{ renderer: 'canvas' }}
+                      style={{ height: '100%', width: '100%' }}
                     />
                   </div>
                 </div>
