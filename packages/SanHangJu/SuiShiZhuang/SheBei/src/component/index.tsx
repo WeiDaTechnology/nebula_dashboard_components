@@ -8,6 +8,31 @@ import useStyles from './styles'
 declare const BlackHole3D: any
 declare const __RUN_ON_LOCAL__: boolean
 
+interface DataItem {
+    "桩号": string,
+    "立柱倾角Y": string,
+    "立柱倾角X": string,
+    "桩尖高程": string,
+    "累计加料体积": string,
+    "振动锤电流": string,
+    "打桩状态": string,
+    "实际坐标X": string,
+    "实际坐标Y": string,
+    "_dbTime": string,
+    "real_height": number,
+    "设计桩顶": string,
+    "上拔速度": string,
+    "设计桩底": string,
+    "实际桩顶": string,
+    "设备名称": string,
+    "平台倾角Y": string,
+    "实际桩底": string,
+    "下贯速度": string,
+    "设备状态": string,
+    "设计坐标Y": string,
+    "设计坐标X": string,
+    "平台倾角X": string
+}
 interface ComponentProps extends ContainerProps {
   /** 弹窗标题 */
   title?: string
@@ -17,113 +42,10 @@ interface ComponentProps extends ContainerProps {
   visible?: boolean
   /** 关闭回调 */
   onClose?: () => void
-  /** 监控数据 */
-  data?: {
-    /** 桩号 */
-    pileNumber?: string
-    /** 设计坐标X */
-    designCoordinateX?: number
-    /** 设计坐标Y */
-    designCoordinateY?: number
-    /** 实际坐标X */
-    actualCoordinateX?: number
-    /** 实际坐标Y */
-    actualCoordinateY?: number
-    /** 实际桩长 */
-    actualPileLength?: number
-    /** 打桩状态 */
-    pilingStatus?: string
-    /** 桩尖深度 */
-    pileTipDepth?: string
-    /** 下贯速度 */
-    penetrationSpeed?: number
-    /** 上拔速度 */
-    extractionSpeed?: number
-    /** 振动锤电流 */
-    vibratoryHammerCurrent?: number
-    /** 立柱倾角X */
-    columnTiltAngleX?: number
-    /** 立柱倾角Y */
-    columnTiltAngleY?: number
-    /** 平台倾角X */
-    platformTiltAngleX?: number
-    /** 平台倾角Y */
-    platformTiltAngleY?: number
-    /** 累计排出碎石量 */
-    accumulatedDischargedVolume?: string
-    /** 管内压力 */
-    pipeInternalPressure?: string
-  }
 }
 
 const deviceMap = ['UWDc9mDcDab2', 'Dsg5vJfPfOnt', '81dxLlYPs21f', 'SJTcSLX1oQuX', 'ePsl8aLOsuyB']
 
-const sql = `SELECT
-  设计桩顶 - 设计桩底 as real_height,
-  累计加料体积,
-  桩号,
-  设计坐标X, 设计坐标Y,
-  实际坐标X, 实际坐标Y,
-  下贯速度, 上拔速度,
-  振动锤电流,
-  立柱倾角X, 立柱倾角Y,
-  平台倾角X, 平台倾角Y,
-  桩尖高程
-FROM
-  fdssz_sg01_001
-ORDER BY
-  _dbTime DESC
-LIMIT 1;`
-const sql002 = `SELECT
-                  桩号,
-                  设计坐标X,
-                  设计坐标Y,
-                  实际坐标X,
-                  实际坐标Y,
-                  下贯速度,
-                  上拔速度,
-                  振动锤电流,
-                  立柱倾角X,
-                  立柱倾角Y,
-                  平台倾角X,
-                  平台倾角Y
-                FROM
-                  fdssz_sg01_002
-                ORDER BY
-                  _dbTime DESC
-LIMIT 1;`
-const sql003 = `SELECT
-  设计桩顶 - 设计桩底 as real_height,
-  累计加料体积,
-  桩号,
-  设计坐标X, 设计坐标Y,
-  实际坐标X, 实际坐标Y,
-  下贯速度, 上拔速度,
-  振动锤电流,
-  立柱倾角X, 立柱倾角Y,
-  平台倾角X, 平台倾角Y,
-  桩尖高程
-FROM
-  fdssz_sg01_003
-ORDER BY
-  _dbTime DESC
-LIMIT 1;`
-const sql004 = `SELECT
-  设计桩顶 - 设计桩底 as real_height,
-  累计加料体积,
-  桩号,
-  设计坐标X, 设计坐标Y,
-  实际坐标X, 实际坐标Y,
-  下贯速度, 上拔速度,
-  振动锤电流,
-  立柱倾角X, 立柱倾角Y,
-  平台倾角X, 平台倾角Y,
-  桩尖高程
-FROM
-  fdssz_sg01_004
-ORDER BY
-  _dbTime DESC
-LIMIT 1;`
 
 const Component: React.FC<ComponentProps> = props => {
   const { style, title = 'DWADRTO1', isOnline = true, visible: controlledVisible, onClose } = props
@@ -133,6 +55,13 @@ const Component: React.FC<ComponentProps> = props => {
   const [internalVisible, setInternalVisible] = useState(false)
   const [stationInfo, setStationInfo] = useState<any>({})
   const [deviceId, setDeviceId] = useState<string | null>(null)
+
+  // 优先使用接口返回的设备状态和设备名称
+  const deviceStatus: string | undefined = stationInfo['设备状态']
+  const deviceName: string | undefined = stationInfo['设备名称']
+  const isOnlineStatus = deviceStatus ? deviceStatus === '在线' : isOnline
+  const statusText = deviceStatus || (isOnline ? '在线' : '离线')
+  const titleText = deviceName || title
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
 
@@ -160,7 +89,6 @@ const Component: React.FC<ComponentProps> = props => {
   useEffect(() => {
     if (deviceId) {
       setInternalVisible(true)
-      getStationInfo()
     }
   }, [deviceId])
 
@@ -176,12 +104,12 @@ const Component: React.FC<ComponentProps> = props => {
       console.log("设备号码 >>>> ", number)
       
       try {
-        const response: any = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+        const response: { data: DataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
           data: {
             dataSetUuid: '8f6a36717ac14d52b3740960a264998e',
           },
         })
-        const data: any[] = response.data
+        const data = response.data
         console.log("接口返回数据 >>>> ", data)
         
         // 根据设备号码匹配对应的设备数据
@@ -211,119 +139,6 @@ const Component: React.FC<ComponentProps> = props => {
     }
   }, [])
 
-  function getStationInfo() {
-    const companyId = localStorage.getItem('companyId')
-    const token = Cookies.get('token')
-    if (deviceId === deviceMap[0]) {
-      fetch('http://zhgc.ltd:18080/graphapi/bjgraphicplatform/dataSet/previewData', {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-          companyid: `${companyId}`,
-          'proxy-connection': 'keep-alive',
-        },
-        body: JSON.stringify({
-          param: {
-            dataSetUuid: 'f6fba8efa2514d6d8515574aa941b607',
-            dsUuid: '2f0d9742f0fc4a689ccfb7dc25a7da3a',
-            sql,
-          },
-        }),
-        mode: 'cors',
-        credentials: 'include',
-      })
-        .then(async resp => {
-          const value = await resp.json()
-          setStationInfo(value.data[0])
-        })
-        .catch(err => {
-          console.error('previewData error', err)
-        })
-    }
-    if (deviceId === deviceMap[1]) {
-      fetch('http://zhgc.ltd:18080/graphapi/bjgraphicplatform/dataSet/previewData', {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-          companyid: `${companyId}`,
-          'proxy-connection': 'keep-alive',
-        },
-        body: JSON.stringify({
-          param: {
-            dataSetUuid: 'f7d110b01e114b76adbee5b1a3b3e9e4',
-            dsUuid: '2f0d9742f0fc4a689ccfb7dc25a7da3a',
-            sql: sql002,
-          },
-        }),
-        mode: 'cors',
-        credentials: 'include',
-      })
-        .then(async resp => {
-          const value = await resp.json()
-          setStationInfo(value.data[0])
-        })
-        .catch(err => {
-          console.error('previewData error', err)
-        })
-    }
-    if (deviceId === deviceMap[2]) {
-      fetch('http://zhgc.ltd:18080/graphapi/bjgraphicplatform/dataSet/previewData', {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-          companyid: `${companyId}`,
-          'proxy-connection': 'keep-alive',
-        },
-        body: JSON.stringify({
-          param: {
-            dataSetUuid: 'a32e9cd0ab3244eb94fa61e6ce5fa623',
-            dsUuid: '2f0d9742f0fc4a689ccfb7dc25a7da3a',
-            sql: sql003,
-          },
-        }),
-        mode: 'cors',
-        credentials: 'include',
-      })
-        .then(async resp => {
-          const value = await resp.json()
-          setStationInfo(value.data[0])
-        })
-        .catch(err => {
-          console.error('previewData 003 error', err)
-        })
-    }
-    if (deviceId === deviceMap[3]) {
-      fetch('http://zhgc.ltd:18080/graphapi/bjgraphicplatform/dataSet/previewData', {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${token}`,
-          'content-type': 'application/json',
-          companyid: `${companyId}`,
-          'proxy-connection': 'keep-alive',
-        },
-        body: JSON.stringify({
-          param: {
-            dataSetUuid: 'fe8d03a9145e4df69a1f402f1a5cecb9',
-            dsUuid: '2f0d9742f0fc4a689ccfb7dc25a7da3a',
-            sql: sql004,
-          },
-        }),
-        mode: 'cors',
-        credentials: 'include',
-      })
-        .then(async resp => {
-          const value = await resp.json()
-          setStationInfo(value.data[0])
-        })
-        .catch(err => {
-          console.error('previewData 004 error', err)
-        })
-    }
-  }
-
   return (
     visible && (<div
       style={
@@ -349,10 +164,13 @@ const Component: React.FC<ComponentProps> = props => {
           {/* 标题栏 */}
           <div className={styles.header}>
             <div className={styles.statusIndicator}>
-              <span className={styles.statusDot} style={{ backgroundColor: isOnline ? '#52c41a' : '#ff4d4f' }} />
-              <span className={styles.statusText}>在线</span>
+              <span
+                className={styles.statusDot}
+                style={{ backgroundColor: isOnlineStatus ? '#52c41a' : '#ff4d4f' }}
+              />
+              <span className={styles.statusText}>{statusText}</span>
             </div>
-            <h2 className={styles.title}>{title}</h2>
+            <h2 className={styles.title}>{titleText}</h2>
             <div className={styles.rightActions}>
               <span className={styles.trophyIcon}>🏆</span>
               <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">

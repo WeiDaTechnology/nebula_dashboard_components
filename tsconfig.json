@@ -6,6 +6,7 @@
     "newLine": "LF",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2017"],
     "strict": true,
     "jsx": "preserve",
     "strictNullChecks": true
