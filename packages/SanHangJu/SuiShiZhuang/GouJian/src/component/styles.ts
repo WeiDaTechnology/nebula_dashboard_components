@@ -40,8 +40,8 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     modalContainer: css`
       position: relative;
       width: 100%;
-      max-width: 1200px;
-      background: linear-gradient(135deg, rgba(20, 30, 50, 0.95) 0%, rgba(10, 20, 40, 0.95) 100%);
+      max-width: 1360px;
+      background: #0b3658;
       border: 1px solid rgba(64, 150, 255, 0.3);
       border-radius: 6px;
       box-shadow:
@@ -70,7 +70,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 12px;
+      padding: 12px 18px;
       background: linear-gradient(90deg, rgba(20, 40, 60, 0.8) 0%, rgba(15, 30, 50, 0.8) 100%);
       border-bottom: 1px solid rgba(64, 150, 255, 0.2);
       position: relative;
@@ -84,8 +84,8 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       left: 12px;
     `,
     statusDot: css`
-      width: 5px;
-      height: 5px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       display: inline-block;
       box-shadow: 0 0 5px currentColor;
@@ -93,12 +93,12 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     `,
     statusText: css`
       color: #fff;
-      font-size: 11px;
-      font-weight: 400;
+      font-size: 14px;
+      font-weight: 500;
       user-select: none;
     `,
     title: css`
-      font-size: 14px;
+      font-size: 18px;
       font-weight: 600;
       color: #fff;
       margin: 0;
@@ -147,15 +147,15 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       }
     `,
     content: css`
-      padding: 12px;
+      padding: 16px 18px 18px;
       flex: 1;
       overflow-y: auto;
       user-select: none;
     `,
     mainLayout: css`
       display: flex;
-      gap: 16px;
-      height: 500px;
+      gap: 18px;
+      height: 480px;
 
       @media (max-width: 768px) {
         flex-direction: column;
@@ -164,7 +164,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       }
     `,
     leftPanel: css`
-      flex: 0 0 320px;
+      flex: 0 0 360px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -177,7 +177,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       height: 100%;
       overflow-y: auto;
     `,
@@ -186,7 +186,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       background: rgba(15, 25, 40, 0.6);
       border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 4px;
-      padding: 10px;
+      padding: 6px 6px 4px;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -215,23 +215,23 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 10px;
+      padding: 9px 12px;
       background: rgba(15, 25, 40, 0.6);
       border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 3px;
       pointer-events: none;
     `,
     label: css`
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 11px;
+      color: #fff;
+      font-size: 13px;
       font-weight: 400;
       white-space: nowrap;
       user-select: none;
     `,
     value: css`
       color: #fff;
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
       text-align: right;
       text-shadow: 0 0 3px rgba(64, 150, 255, 0.3);
       min-width: 70px;

@@ -150,8 +150,8 @@ const Component: React.FC<ComponentProps> = props => {
             }
           : {
               ...style,
-              width: '448px',
-              height: '513px',
+              width: '560px',
+              height: '640px',
               backgroundColor: 'transparent',
               left: 0,
               top: 0,

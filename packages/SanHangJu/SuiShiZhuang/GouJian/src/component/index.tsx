@@ -54,7 +54,29 @@ interface ComponentProps extends ContainerProps {
     pipeInternalPressure?: string
   }
 }
-
+// {
+//     "桩号": "S11-1-12",
+//     "立柱倾角Y": "-0.27",
+//     "立柱倾角X": "-0.85",
+//     "桩尖高程": "-1.23",
+//     "累计加料体积": "30.00",
+//     "振动锤电流": "325.5",
+//     "打桩状态": "开始打桩",
+//     "实际坐标X": "0.000",
+//     "实际坐标Y": "0.000",
+//     "real_height": 32,
+//     "设计桩顶": "0.00",
+//     "上拔速度": "1.67",
+//     "设计桩底": "-32.00",
+//     "实际桩顶": "0.00",
+//     "平台倾角Y": "-0.00",
+//     "实际桩底": "-32.00",
+//     "下贯速度": "0.00",
+//     "设备状态": "离线",
+//     "设计坐标Y": "0.000",
+//     "设计坐标X": "0.000",
+//     "平台倾角X": "-0.03"
+// }
 type dataItem = {
   设备号?: string
   桩号: string
@@ -214,7 +236,7 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     ?.find?.((e: any) => e.group === '用户定义属性')
     ?.data?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
 
-  zhuanghao = 'S11-1-12'
+  // zhuanghao = 'S11-1-12'
   if (!zhuanghao) {
     return null
   }
@@ -343,8 +365,8 @@ const Component: React.FC<ComponentProps> = props => {
         left: 10,
         top: 10,
         textStyle: {
-          color: 'rgba(255, 255, 255, 0.85)',
-          fontSize: 14,
+          color: '#fff',
+          fontSize: 16,
           fontWeight: 500
         }
       },
@@ -364,8 +386,8 @@ const Component: React.FC<ComponentProps> = props => {
           }
         },
         axisLabel: {
-          color: 'rgba(255, 255, 255, 0.5)',
-          fontSize: 10,
+          color: '#fff',
+          fontSize: 12,
           rotate: 45,
           interval: 0
         },
@@ -385,8 +407,8 @@ const Component: React.FC<ComponentProps> = props => {
           show: false
         },
         axisLabel: {
-          color: 'rgba(90, 159, 184, 0.8)',
-          fontSize: 11
+          color: '#fff',
+          fontSize: 12
         },
         splitLine: {
           lineStyle: {
@@ -445,7 +467,7 @@ const Component: React.FC<ComponentProps> = props => {
         borderWidth: 1,
         textStyle: {
           color: '#fff',
-          fontSize: 12
+          fontSize: 13
         },
         formatter: (params: any) => {
           const param = params[0]
@@ -516,8 +538,8 @@ const Component: React.FC<ComponentProps> = props => {
               }
             : {
                 ...style,
-                width: '900px',
-                height: '443px',
+                width: '1000px',
+                height: '650px',
                 backgroundColor: 'transparent',
                 left: 0,
                 top: 0,
@@ -549,10 +571,6 @@ const Component: React.FC<ComponentProps> = props => {
                 {/* 左侧数据列表 */}
                 <div className={styles.leftPanel}>
                   <div className={styles.dataItem}>
-                    <span className={styles.label}>设备号</span>
-                    <span className={styles.value}>{stationInfo?.['设备号'] || '/'}</span>
-                  </div>
-                  <div className={styles.dataItem}>
                     <span className={styles.label}>桩号</span>
                     <span className={styles.value}>{stationInfo?.['桩号'] || '/'}</span>
                   </div>
@@ -561,19 +579,19 @@ const Component: React.FC<ComponentProps> = props => {
                     <span className={styles.value}>{stationInfo?.['成孔起止时间'] || '/'}</span>
                   </div>
                   <div className={styles.dataItem}>
-                    <span className={styles.label}>设计框顶</span>
+                    <span className={styles.label}>设计桩顶</span>
                     <span className={styles.value}>{formatValue(stationInfo?.['设计桩顶'], 'm')}</span>
                   </div>
                   <div className={styles.dataItem}>
-                    <span className={styles.label}>设计框底</span>
+                    <span className={styles.label}>设计桩底</span>
                     <span className={styles.value}>{formatValue(stationInfo?.['设计桩底'], 'm')}</span>
                   </div>
                   <div className={styles.dataItem}>
-                    <span className={styles.label}>实际框顶</span>
+                    <span className={styles.label}>实际桩顶</span>
                     <span className={styles.value}>{formatValue(stationInfo?.['实际桩顶'], 'm')}</span>
                   </div>
                   <div className={styles.dataItem}>
-                    <span className={styles.label}>实际框底</span>
+                    <span className={styles.label}>实际桩底</span>
                     <span className={styles.value}>{formatValue(stationInfo?.['实际桩底'], 'm')}</span>
                   </div>
                   <div className={styles.dataItem}>
