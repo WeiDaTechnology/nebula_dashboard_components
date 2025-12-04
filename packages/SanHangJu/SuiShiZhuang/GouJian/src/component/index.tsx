@@ -118,20 +118,22 @@ interface ChartsData {
 }
 
 // {
-//         "half_hour_interval": "2025-11-20 22:00:00",
-//         "桩号": "S11-1-12",
-//         "电流": 177.25,
-//         "频率": 17.7,
-//         "深度": 32,
-//         "填料量": 12.3
-//     }
+//   "桩号": "S11-9-68",
+//   "平均频率": number,
+//   "平均电流": number,
+//   "时间段": string,
+//   "平均填料量": number,
+//   "数据来源表": string,
+//   "平均深度": number
+// }
 type ChartDataItem = {
-  half_hour_interval: string
-  桩号: string
-  电流: number
-  频率: number
-  深度: number
-  填料量: number
+  "桩号": string,
+  "平均频率": number,
+  "平均电流": number,
+  "时间段": string,
+  "平均填料量": number,
+  "数据来源表": string,
+  "平均深度": number
 }
 // 将API返回的图表数据转换为ECharts需要的格式
 function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
@@ -150,22 +152,25 @@ function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
   const current: ChartDataPoint[] = []
 
   chartDataItems.forEach(item => {
-    // 格式化时间 (从 "2025-11-20 22:00:00" 提取时间部分)
-    const time = item.half_hour_interval.split(' ')[1] || item.half_hour_interval
+    // 使用后端返回的最新字段「时间段」作为横轴
+    const time = item['时间段'] || ''
 
     depth.push({
       time,
-      value: item.深度 || 0,
+      // 使用「平均深度」作为深度曲线数据
+      value: item['平均深度'] ?? 0,
     })
 
     volume.push({
       time,
-      value: item.填料量 || 0,
+      // 使用「平均填料量」作为填料量曲线数据
+      value: item['平均填料量'] ?? 0,
     })
 
     current.push({
       time,
-      value: item.电流 || 0,
+      // 使用「平均电流」作为电流曲线数据
+      value: item['平均电流'] ?? 0,
     })
   })
 
@@ -243,12 +248,7 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     return null
   }
   let shebei = ''
-  const map: Record<string, string> = {
-    fe8d03a9145e4df69a1f402f1a5cecb9: '029e5b0183f8472fb20e7689fe245422',
-    a32e9cd0ab3244eb94fa61e6ce5fa623: 'ff40511b887f4f62859f229e43348bfb',
-    f7d110b01e114b76adbee5b1a3b3e9e4: 'e47e9185b3d54ad7b7727344bbb0bdf9',
-    f6fba8efa2514d6d8515574aa941b607: '0a3e3ace0ef84630b479fb14e366ef7e',
-  }
+
   const a = [
     'fe8d03a9145e4df69a1f402f1a5cecb9', // 4 "029e5b0183f8472fb20e7689fe245422"
     'a32e9cd0ab3244eb94fa61e6ce5fa623', // 3 "ff40511b887f4f62859f229e43348bfb"
@@ -276,9 +276,31 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
   }
 
   // 获取图表数据
+  /**
+   * [
+    {
+        "桩号": "S11-9-68",
+        "平均频率": 44,
+        "平均电流": 350.4,
+        "时间段": "11-13 15:00",
+        "平均填料量": 30,
+        "数据来源表": "fdssz_sg01_002",
+        "平均深度": -4.75
+    },
+    {
+        "桩号": "S11-9-68",
+        "平均频率": 44,
+        "平均电流": 326.33,
+        "时间段": "11-13 16:00",
+        "平均填料量": 30,
+        "数据来源表": "fdssz_sg01_002",
+        "平均深度": 0.28
+    }
+  ]
+   */
   const x: { data: ChartDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
     data: {
-      dataSetUuid: map[shebei],
+      dataSetUuid: '3d9098f1c0694abaa402514ce53dbd56',
       params: {
         zhuanghao,
       },
