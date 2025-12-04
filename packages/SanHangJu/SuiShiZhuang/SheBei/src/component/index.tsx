@@ -95,6 +95,7 @@ const Component: React.FC<ComponentProps> = props => {
   useEffect(() => {
     const handler = async () => {
       const element = BlackHole3D?.Probe?.getCurCombProbeRet().elemId
+      if(!BlackHole3D.Anchor.getAllAnc().map((item: any) => item.ancName).includes(element)) return
       const ancData = BlackHole3D.Anchor.getAnc(element)
       console.log("ancData >>>> ", ancData)
       // textInfo "4#碎石桩"
