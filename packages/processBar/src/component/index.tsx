@@ -14,11 +14,16 @@ const Component: FC<any> = props => {
     color2 = '#1DDBE6',
     scale_font_size,
     progress_font_size,
+    dataSourceData,
+    startLoad,
+    onLoad,
   } = props
   const { scale_font_color, progress_font_color } = props
   const [icon_url, setIconUrl] = useState('')
   const ticks = [0, 20, 40, 60, 80, 90, 100]
-  const value = Math.max(0, Math.min(100, props.progress ?? 65.0))
+  // const value = Math.max(0, Math.min(100, dataSourceData.processedData[0][0].value ?? 65.0))
+  const v = dataSourceData.processedData[0]
+  const value = Number(v?.[0]?.value) * 100
   const duration = Math.max(0, Number(props?.animation_duration ?? 400))
 
   const [renderValue, setRenderValue] = useState(is_open_animation ? 0 : value)
@@ -36,8 +41,10 @@ const Component: FC<any> = props => {
     }
     return url
   }, [])
+  // startLoad()
+  // onLoad()
 
-  console.log('extraChartData', props.extraChartData)
+  console.log('props.__designMode', props.__designMode)
 
   useEffect(() => {
     setIconUrl(buildImageUrl(head_icon))
@@ -45,6 +52,11 @@ const Component: FC<any> = props => {
 
   useEffect(() => {
     if (is_open_animation) {
+      // 触发开始加载回调
+      if (props.__designMode === 'preview') {
+        startLoad()
+      }
+
       if (is_reverse) {
         // 反向加载：进度条长度从0开始，从刻度100向0延伸
         setRenderValue(0)
@@ -58,6 +70,9 @@ const Component: FC<any> = props => {
           setRenderValue(currentValue)
           if (t < 1) {
             rafId = requestAnimationFrame(step)
+          } else if (props.__designMode === 'preview') {
+            // 加载结束,触发回调
+            onLoad()
           }
         }
         rafId = requestAnimationFrame(step)
@@ -75,6 +90,9 @@ const Component: FC<any> = props => {
         setDisplayValue(value * t)
         if (t < 1) {
           rafId = requestAnimationFrame(step)
+        } else if (props.__designMode === 'preview') {
+          // 加载结束,触发回调
+          onLoad()
         }
       }
       rafId = requestAnimationFrame(step)
@@ -84,7 +102,12 @@ const Component: FC<any> = props => {
         cancelAnimationFrame(rafId)
       }
     }
-  }, [is_open_animation, value, duration, is_reverse])
+    // 无动画模式,直接触发开始和结束回调
+    if (props.__designMode === 'preview') {
+      startLoad()
+      onLoad()
+    }
+  }, [is_open_animation, value, duration, is_reverse, startLoad, onLoad, props.__designMode])
 
   return (
     <div style={{ width: '100%', display: 'flex', alignItems: 'center' }}>

@@ -60,7 +60,7 @@ if (__RUN_ON_LOCAL__) {
       title: '进度加载',
       eventConfigure: [
         {
-          eventName: 'startPlay',
+          eventName: 'startLoad',
           displayName: '当加载开始时',
         },
         {
