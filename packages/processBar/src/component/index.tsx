@@ -22,8 +22,7 @@ const Component: FC<any> = props => {
   const [icon_url, setIconUrl] = useState('')
   const ticks = [0, 20, 40, 60, 80, 90, 100]
   // const value = Math.max(0, Math.min(100, dataSourceData.processedData[0][0].value ?? 65.0))
-  const v = dataSourceData.processedData[0]
-  const value = Number(v?.[0]?.value) * 100
+  const value = Number(dataSourceData.processedData?.[0]?.[0]?.value ?? 0) * 100
   const duration = Math.max(0, Number(props?.animation_duration ?? 400))
 
   const [renderValue, setRenderValue] = useState(is_open_animation ? 0 : value)
@@ -44,7 +43,7 @@ const Component: FC<any> = props => {
   // startLoad()
   // onLoad()
 
-  console.log('props.__designMode', props.__designMode)
+  console.log('props.__designMode', dataSourceData)
 
   useEffect(() => {
     setIconUrl(buildImageUrl(head_icon))
