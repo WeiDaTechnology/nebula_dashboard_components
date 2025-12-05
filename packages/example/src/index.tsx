@@ -59,8 +59,12 @@ if (__RUN_ON_LOCAL__) {
       title: '交互',
       eventConfigure: [
         {
-          eventName: 'onClick',
-          displayName: '点击',
+          eventName: 'startLoad',
+          displayName: '当开始加载时',
+        },
+        {
+          eventName: 'endLoad',
+          displayName: '当加载完成时',
         },
       ],
     },

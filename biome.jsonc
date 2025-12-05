@@ -4,11 +4,14 @@
   "linter": {
     "rules": {
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "off"
       },
       "correctness": {
-        "noUnusedFunctionParameters": "warn",
-        "noUndeclaredVariables": "warn"
+        "noUnusedFunctionParameters": "off",
+        "noUndeclaredVariables": "off"
+      },
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off"
       },
       "style": {
         "useConsistentTypeDefinitions": "off"

@@ -7,7 +7,15 @@ export interface EventConfigure {
   displayName: string
 }
 
-export interface Configure {
+export type Configure =
+  | ConfigureItem
+  | ConfigureItem[]
+  | Array<{
+      pos?: number
+      configure: ConfigureItem
+    }>
+
+export interface ConfigureItem {
   /** 属性字段 */
   name?: string
   /** 布局类型 */
