@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "paths": {
+      "@/*": ["./src/*"],
+      "~/*": ["./*"]
+    },
+    "strictNullChecks": true,
+    "skipLibCheck": true
+  },
+  "include": ["./src", "react-app-env.d.ts"]
+}

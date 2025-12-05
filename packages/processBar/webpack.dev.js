@@ -35,7 +35,7 @@ module.exports = {
       },
 
   devServer: {
-    port: 5011,
+    port: 5010,
     host: '127.0.0.1',
     allowedHosts: 'all',
     headers: { 'Access-Control-Allow-Origin': '*' },

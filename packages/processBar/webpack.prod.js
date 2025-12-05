@@ -1,49 +1,36 @@
 const path = require('node:path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const _MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
-const isRunOnLocal = process.env.RUN_ON_LOCAL === 'true'
-
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: {
     index: './src/index.tsx',
   },
 
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-    chunkFilename: '[name].async.js',
+    filename: '[name].[contenthash:8].js',
+    chunkFilename: '[name].[contenthash:8].async.js',
     publicPath: '/',
+    library: 'graphic-custom-component',
+    libraryTarget: 'umd',
+    globalObject: 'window',
   },
 
-  devtool: 'eval-source-map',
-
-  externals: isRunOnLocal
-    ? {}
-    : {
-        react: 'var window.GPReact',
-        'react-dom': 'var window.GPReactDOM',
-        moment: 'var window.moment',
-        lodash: 'var window._',
-        antd: 'var window.GPAntd',
-        '@ant-design/pro-form': 'var window.ProForm',
-        '@ant-design/pro-table': 'var window.ProTable',
-        '@metacode/runtime': 'var window.MetacodeRuntime',
-      },
-
-  devServer: {
-    port: 5011,
-    host: '127.0.0.1',
-    allowedHosts: 'all',
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    historyApiFallback: true,
-    hot: true,
-    client: {
-      overlay: false,
-    },
+  externals: {
+    react: 'var window.GPReact',
+    'react-dom': 'var window.GPReactDOM',
+    moment: 'var window.moment',
+    lodash: 'var window._',
+    antd: 'var window.GPAntd',
+    '@ant-design/pro-form': 'var window.ProForm',
+    '@ant-design/pro-table': 'var window.ProTable',
+    '@metacode/runtime': 'var window.MetacodeRuntime',
   },
 
   module: {
@@ -55,7 +42,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(scss|sass)$/,
@@ -63,7 +50,7 @@ module.exports = {
           {
             resourceQuery: /module/,
             use: [
-              'style-loader',
+              MiniCssExtractPlugin.loader,
               {
                 loader: 'css-loader',
                 options: {
@@ -77,7 +64,7 @@ module.exports = {
             ],
           },
           {
-            use: ['style-loader', 'css-loader', 'sass-loader'],
+            use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
           },
         ],
       },
@@ -87,7 +74,7 @@ module.exports = {
           {
             resourceQuery: /module/,
             use: [
-              'style-loader',
+              MiniCssExtractPlugin.loader,
               {
                 loader: 'css-loader',
                 options: {
@@ -109,7 +96,7 @@ module.exports = {
           },
           {
             use: [
-              'style-loader',
+              MiniCssExtractPlugin.loader,
               'css-loader',
               {
                 loader: 'less-loader',
@@ -148,6 +135,25 @@ module.exports = {
     ],
   },
 
+  optimization: {
+    minimizer: [
+      new CssMinimizerPlugin(),
+      new TerserPlugin({
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+            pure_funcs: ['console.log', 'console.error'],
+          },
+          format: {
+            comments: false,
+          },
+        },
+        extractComments: false,
+      }),
+    ],
+  },
+
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
@@ -156,10 +162,14 @@ module.exports = {
       inject: 'body',
       chunks: ['index'],
     }),
+    new MiniCssExtractPlugin({
+      filename: '[name].[contenthash:8].css',
+      chunkFilename: '[name].[contenthash:8].async.css',
+    }),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development'),
+      'process.env.NODE_ENV': JSON.stringify('production'),
       'process.env.DEPLOY_ENV': JSON.stringify(process.env.DEPLOY_ENV),
-      __RUN_ON_LOCAL__: JSON.stringify(process.env.RUN_ON_LOCAL === 'true'),
+      __RUN_ON_LOCAL__: JSON.stringify(false),
     }),
   ],
 
