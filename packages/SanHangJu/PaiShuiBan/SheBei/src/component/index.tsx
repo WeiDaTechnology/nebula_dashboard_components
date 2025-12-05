@@ -59,8 +59,7 @@ const Component: React.FC<ComponentProps> = props => {
   const deviceState: number | undefined = stationInfo?.state
   const deviceName: string | undefined = stationInfo?.device_name
   const isOnlineStatus = deviceState !== undefined ? deviceState === 1 : isOnline
-  const statusText =
-    deviceState !== undefined ? (deviceState === 1 ? '在线' : '离线') : isOnline ? '在线' : '离线'
+  const statusText = deviceState !== undefined ? (deviceState === 1 ? '在线' : '离线') : isOnline ? '在线' : '离线'
   const titleText = deviceName || title
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
@@ -116,7 +115,7 @@ const Component: React.FC<ComponentProps> = props => {
             },
           },
         })
-     
+
         const currentDeviceData = response.data?.[0]
 
         /**
@@ -163,7 +162,7 @@ const Component: React.FC<ComponentProps> = props => {
   }, [])
 
   return (
-  visible && (
+    visible && (
       <div
         style={
           __RUN_ON_LOCAL__
@@ -238,9 +237,7 @@ const Component: React.FC<ComponentProps> = props => {
                 <div className={styles.dataColumn}>
                   <div className={styles.dataItem}>
                     <span className={styles.label}>开始时间</span>
-                    <span className={styles.value}>
-                      {stationInfo ? formatTimestamp(stationInfo.begin_time) : '/'}
-                    </span>
+                    <span className={styles.value}>{stationInfo ? formatTimestamp(stationInfo.begin_time) : '/'}</span>
                   </div>
                   <div className={styles.dataItem}>
                     <span className={styles.label}>结束时间</span>

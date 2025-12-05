@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
@@ -133,7 +133,7 @@ const Component: React.FC<ComponentProps> = props => {
       try {
         const element = BlackHole3D?.Probe?.getCurCombProbeRet?.()?.elemId
         const anchorNames = BlackHole3D?.Anchor?.getAllAnc?.()?.map((item: any) => item.ancName) || []
-        if (!element || !anchorNames.includes(element)) return
+        if (!(element && anchorNames.includes(element))) return
 
         const ancData = BlackHole3D?.Anchor?.getAnc?.(element)
         const textInfo: string = ancData?.textInfo || ''

@@ -1,5 +1,5 @@
 import ReactECharts from 'echarts-for-react'
-import React from 'react'
+import type React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
@@ -277,7 +277,6 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     },
   })
   const foundData = response.data?.[0]
-
 
   // 获取图表数据
   /**

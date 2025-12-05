@@ -127,13 +127,13 @@ interface ChartsData {
 //   "平均深度": number
 // }
 type ChartDataItem = {
-  "桩号": string,
-  "平均频率": number,
-  "平均电流": number,
-  "时间段": string,
-  "平均填料量": number,
-  "数据来源表": string,
-  "平均深度": number
+  桩号: string
+  平均频率: number
+  平均电流: number
+  时间段: string
+  平均填料量: number
+  数据来源表: string
+  平均深度: number
 }
 // 将API返回的图表数据转换为ECharts需要的格式
 function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {

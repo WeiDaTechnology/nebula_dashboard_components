@@ -16,7 +16,6 @@ interface ComponentProps extends ContainerProps {
   visible?: boolean
   /** 关闭回调 */
   onClose?: () => void
- 
 }
 
 // 真实的左侧详情数据
@@ -224,7 +223,6 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     },
   })
   const foundData = response.data?.[0]
-
 
   // 获取图表数据
   /**
