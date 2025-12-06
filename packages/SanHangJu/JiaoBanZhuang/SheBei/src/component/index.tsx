@@ -13,21 +13,44 @@ interface DataItem {
   startTime: string
   /** 结束时间 */
   endTime: string
-
   /** 桩长（m） */
   pileLength: string | number
   /** 桩径（m） */
   pileDiameter: string | number
-  /** 施工用时（分钟） */
-  durationMinutes: string | number
-  /** 泥浆用量 */
-  slurryUsage: string | number
-  /** 实际水泥用量 */
-  cementUsage: string | number
+  /** 加固土量 */
+  total: string | number
   /** 设备名称，展示在标题处 */
   deviceName?: string
 }
+/**
+ * 后端返回字段映射：
+ * input_oyigkl      -> pileNumber    (桩号)        e.g. "SN-14-460"
+ * timepicker_9yn01y -> startTime     (开始时间)    e.g. "08:16:00"
+ * timepicker_7y5tba -> endTime       (结束时间)    e.g. "10:51:00"
+ * numberinput_ud2fax-> pileLength    (桩长)        e.g. 29.5
+ * numberinput_adav79-> pileDiameter  (桩径)        e.g. 1
+ * numberinput_91nj00-> total         (加固土量)    e.g. 23.16
+ */
 
+/** 后端原始返回数据结构 */
+interface BackendDataItem {
+  input_oyigkl: string // 桩号
+  timepicker_9yn01y: string // 开始时间
+  timepicker_7y5tba: string // 结束时间
+  numberinput_ud2fax: number // 桩长
+  numberinput_adav79: number // 桩径
+  numberinput_91nj00: number // 加固土量
+}
+
+/** 将后端数据转换为前端数据格式 */
+const transformBackendData = (backendData: BackendDataItem): DataItem => ({
+  pileNumber: backendData.input_oyigkl,
+  startTime: backendData.timepicker_9yn01y,
+  endTime: backendData.timepicker_7y5tba,
+  pileLength: backendData.numberinput_ud2fax,
+  pileDiameter: backendData.numberinput_adav79,
+  total: backendData.numberinput_91nj00,
+})
 interface ComponentProps extends ContainerProps {
   /** 弹窗标题 */
   title?: string
@@ -89,42 +112,30 @@ const Component: React.FC<ComponentProps> = props => {
         return
       const ancData = BlackHole3D.Anchor.getAnc(element)
       // textInfo "2#搅拌桩"
-      if (!ancData.textInfo.includes('搅拌桩')) return
-
-      const number = ancData.textInfo.split('#')[0] // 设备号码，例如 "4"
+      if (!ancData.textInfo.includes('桩机')) return
 
       try {
         // 请求接口数据
-        const response: { data: DataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+        const response: { data: BackendDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
           data: {
             dataSetUuid: '9f6abc6d12764dd3b608517ead986b11',
             params: {
-              pileNumber: `桩机${number}`,
+              pileNumber: ancData.textInfo,
             },
           },
         })
-        /** {
-  "colAlias": null,
-  "colDesc": "桩号",
-  "colDisplayName": "pileNumber",
-  "colName": "input_oyigkl",
-  "colType": "varchar",
-  "dataSetColUuid": null,
-  "dataSetUuid": null,
-  "ownedOrgType": null,
-  "projectId": null
-} */
 
-        const currentDeviceData = response.data?.[0]
-        console.log('搅拌桩接口返回数据:', currentDeviceData)
+        const backendData = response.data?.[0]
+        console.log('搅拌桩接口返回数据:', backendData)
 
-        if (currentDeviceData) {
+        if (backendData) {
+          // 转换后端数据为前端格式
+          const currentDeviceData = transformBackendData(backendData)
           setStationInfo(currentDeviceData)
           setInternalVisible(true)
         } else {
-          console.warn(`未找到桩机${number}的数据`)
+          console.warn(`未找到桩机${ancData.textInfo}的数据`)
         }
-        // ...
       } catch (error) {
         console.error('获取设备数据失败 >>>> ', error)
       }
@@ -143,8 +154,7 @@ const Component: React.FC<ComponentProps> = props => {
     { label: '结束时间', value: currentData?.endTime },
     { label: '桩长（m）', value: currentData?.pileLength },
     { label: '桩径（m）', value: currentData?.pileDiameter },
-    { label: '施工用时（分钟）', value: currentData?.durationMinutes },
-    { label: '泥浆用量', value: currentData?.slurryUsage }
+    { label: '加固土量', value: currentData?.total },
   ]
 
   return (
