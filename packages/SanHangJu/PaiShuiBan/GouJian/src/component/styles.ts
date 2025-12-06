@@ -168,9 +168,11 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      height: 100%;
 
       @media (max-width: 768px) {
         flex: 1;
+        height: auto;
       }
     `,
     rightPanel: css`
@@ -220,6 +222,8 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 3px;
       pointer-events: none;
+      flex: 1;
+      min-height: 0;
     `,
     label: css`
       color: #fff;

@@ -1,5 +1,5 @@
 import ReactECharts from 'echarts-for-react'
-import type * as React from 'react'
+import * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
@@ -81,6 +81,7 @@ type LeftDetailItem = {
   longitude: number
   part_count: number
   workDuration: number
+  state: number // 1是在线，不是1是离线
 }
 
 // 柱状图原始数据
@@ -123,6 +124,51 @@ interface ChartsData {
 
 // 图表接口原始返回
 type ChartDataItem = BarChartSourceItem & LineChartSourceItem
+
+// 开发/联调开关：true 使用本地模拟数据，false 走真实接口
+// TODO: 上线前请确认改为 false 或删除模拟数据逻辑
+const USE_MOCK_DATA = false
+
+// 本地调样式使用的模拟数据
+const MOCK_STATION_INFO: dataItem = {
+  device_key: 'DP01808025100001',
+  depth: 173.06,
+  piles_scribe: 'A4-2',
+  latitude: 39.9042,
+  end_time: 1761186120,
+  begin_time: 1760602418,
+  longitude: 116.4074,
+  part_count: 8,
+  workDuration: 162.14,
+  barChartData: [
+    {
+      totalPile: 1,
+      hour_time: '2025-10-23 10:00:00',
+    },
+    {
+      totalPile: 3,
+      hour_time: '2025-10-23 11:00:00',
+    },
+    {
+      totalPile: 2,
+      hour_time: '2025-10-23 12:00:00',
+    },
+  ],
+  lineChartData: [
+    {
+      total_length: -0.22,
+      hour_time: '2025-10-23 10:00:00',
+    },
+    {
+      total_length: 0.5,
+      hour_time: '2025-10-23 11:00:00',
+    },
+    {
+      total_length: 1.2,
+      hour_time: '2025-10-23 12:00:00',
+    },
+  ],
+}
 
 // 时间戳格式化工具（秒时间戳）
 function formatTimestamp(timestamp?: number): string {
@@ -288,6 +334,7 @@ const Component: React.FC<ComponentProps> = props => {
   })
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
+  // const visible = true
 
   const handleClose = () => {
     if (controlledVisible === undefined) {
@@ -482,6 +529,19 @@ const Component: React.FC<ComponentProps> = props => {
   )
 
   useEffect(() => {
+    // 使用本地模拟数据：直接填充数据并显示弹窗，不绑定 BlackHole3D 事件
+    if (USE_MOCK_DATA) {
+      const mergedChartItems: ChartDataItem[] = [
+        ...((MOCK_STATION_INFO.barChartData || []) as ChartDataItem[]),
+        ...((MOCK_STATION_INFO.lineChartData || []) as ChartDataItem[]),
+      ]
+      const mockCharts = convertChartData(mergedChartItems)
+      setStationInfo(MOCK_STATION_INFO)
+      setChartsData(mockCharts)
+      setInternalVisible(true)
+      return
+    }
+
     async function RESystemSelElement() {
       console.log('-- 鼠标探测模型事件 --', BlackHole3D.Probe.getCurCombProbeRet())
       const res = BlackHole3D.Probe.getCurCombProbeRet()

@@ -101,17 +101,15 @@ const Component: React.FC<ComponentProps> = props => {
       )
         return
       const ancData = BlackHole3D.Anchor.getAnc(element)
-      // textInfo "4#排水版"
-      if (!ancData.textInfo.includes('排水版')) return
-
-      const number = ancData.textInfo.split('#')[0] // 设备号码，例如 "4"
+     
+      const number = ancData.textInfo[0] // 设备号码，例如 "4"
 
       try {
         const response: { data: DataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
           data: {
             dataSetUuid: 'a4c871ac861b4b94864b98d8e288c0d4',
             params: {
-              device_key: `DP0180802510000${number}`,
+              device_name: ancData.textInfo,
             },
           },
         })

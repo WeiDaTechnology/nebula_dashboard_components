@@ -314,7 +314,7 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
 }
 
 const Component: React.FC<ComponentProps> = props => {
-  const { style, title = 'DWADRTO1', isOnline = true, visible: controlledVisible, onClose } = props
+  const { style, title, isOnline = true, visible: controlledVisible, onClose } = props
   const { styles } = useStyles()
 
   console.log('Component', props)
@@ -393,9 +393,9 @@ const Component: React.FC<ComponentProps> = props => {
         },
       },
       grid: {
-        left: '50',
-        right: '20',
-        top: '50',
+        left: '40',
+        right: '8',
+        top: '38',
         bottom: '40',
         containLabel: false,
       },
@@ -409,9 +409,17 @@ const Component: React.FC<ComponentProps> = props => {
         },
         axisLabel: {
           color: '#fff',
-          fontSize: 12,
-          rotate: 45,
+          fontSize: 11,
+          rotate: 0,
           interval: 0,
+          formatter: (value: string) => {
+            // 将 "10-23 10:00" 分成两行显示
+            const parts = value.split(' ')
+            if (parts.length === 2) {
+              return `${parts[0]}\n${parts[1]}`
+            }
+            return value
+          },
         },
         axisTick: {
           show: false,
@@ -422,6 +430,7 @@ const Component: React.FC<ComponentProps> = props => {
         min: yMin,
         max: yMax,
         scale: true,
+        splitNumber: 3,
         axisLine: {
           show: false,
         },
@@ -430,7 +439,7 @@ const Component: React.FC<ComponentProps> = props => {
         },
         axisLabel: {
           color: '#fff',
-          fontSize: 12,
+          fontSize: 11,
         },
         splitLine: {
           lineStyle: {
@@ -577,11 +586,7 @@ const Component: React.FC<ComponentProps> = props => {
           <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
             {/* 标题栏 */}
             <div className={styles.header}>
-              <div className={styles.statusIndicator}>
-                <span className={styles.statusDot} style={{ backgroundColor: isOnline ? '#52c41a' : '#ff4d4f' }} />
-                <span className={styles.statusText}>在线</span>
-              </div>
-              <h2 className={styles.title}>{title}</h2>
+              <h2 className={styles.title}>{stationInfo?.['桩号'] || '/'}</h2>
               <div className={styles.rightActions}>
                 <span className={styles.trophyIcon}>🏆</span>
                 <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
