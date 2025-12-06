@@ -22,60 +22,6 @@ interface ComponentProps extends ContainerProps {
     lineChartData?: LineChartSourceItem[]
   }
 }
-
-// 真实的左侧详情数据
-// [
-//     {
-//         "device_key": "DP01808025100001",
-//         "depth": 173.06,
-//         "piles_scribe": "A4-2",
-//         "latitude": 0,
-//         "end_time": 1761186120,
-//         "begin_time": 1760602418,
-//         "longitude": 0,
-//         "part_count": 8,
-//         "workDuration": 162.14
-//     }
-// ]
-// 真正是字段：
-// 区域号
-// 开始时间
-// 结束时间
-// 桩机变化
-// 经度
-// 纬度
-// 总带长
-// 组内数量
-// 作业时长
-
-// 真实的柱状图数据
-// [
-//     {
-//         "totalPile": 1,
-//         "hour_time": "2025-10-23 10:00:00"
-//     }
-// ]
-
-// 真实的折线图数据
-// [
-//     {
-//         "hour_time": "2025-10-23 10:00:00",
-//         "total_length": -0.22
-//     }
-// ]
-// ----------------------------------------------------------------
-// 左侧详情真实数据结构
-// {
-//   "device_key": "DP01808025100001",
-//   "depth": 173.06,
-//   "piles_scribe": "A4-2",
-//   "latitude": 0,
-//   "end_time": 1761186120,
-//   "begin_time": 1760602418,
-//   "longitude": 0,
-//   "part_count": 8,
-//   "workDuration": 162.14
-// }
 type LeftDetailItem = {
   device_key: string
   depth: number
@@ -259,54 +205,31 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     autoBoxParam: false,
     skipErrorThrower: true,
   })
-  const qukuaihao = elementParam?.elementParams
+  const zhanghao = elementParam?.elementParams
     ?.find?.((e: any) => e.group === '用户定义属性')
-    ?.data?.find?.((e: any) => e?.paramName === '区块号')?.paramValue
+    ?.data?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
 
-  // qukuaihao = 'A4-2'
-  if (!qukuaihao) {
+  // zhuanghao = "SN-10-147"
+  if (!zhanghao) {
     return null
   }
 
   const response: { data: LeftDetailItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
     data: {
-      dataSetUuid: '3fbfae9d47164c3a8ffb04a42f2ffe8b',
+      dataSetUuid: '73b7a18253e9491db99c17858bf82eab',
       params: {
-        piles_scribe: qukuaihao,
+        piles_scribe: zhanghao,
       },
     },
   })
   const foundData = response.data?.[0]
 
-  // 获取图表数据
-  /**
-   * [
-    {
-        "桩号": "S11-9-68",
-        "平均频率": 44,
-        "平均电流": 350.4,
-        "时间段": "11-13 15:00",
-        "平均填料量": 30,
-        "数据来源表": "fdssz_sg01_002",
-        "平均深度": -4.75
-    },
-    {
-        "桩号": "S11-9-68",
-        "平均频率": 44,
-        "平均电流": 326.33,
-        "时间段": "11-13 16:00",
-        "平均填料量": 30,
-        "数据来源表": "fdssz_sg01_002",
-        "平均深度": 0.28
-    }
-  ]
-   */
   // 根数 - 柱状图数据源
   const resBar: { data: BarChartSourceItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
     data: {
       dataSetUuid: '7dc0c80fd7574f76b035fdbf951422d1',
       params: {
-        piles_scribe: qukuaihao,
+        piles_scribe: zhanghao,
       },
     },
   })
@@ -314,9 +237,9 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
   // 带长 - 折线图数据源
   const resLine: { data: LineChartSourceItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
     data: {
-      dataSetUuid: '8aa08c5da0934acb885f7a74360d2466',
+      dataSetUuid: '73b7a18253e9491db99c17858bf82eab',
       params: {
-        piles_scribe: qukuaihao,
+        piles_scribe: zhanghao,
       },
     },
   })
@@ -421,61 +344,61 @@ const Component: React.FC<ComponentProps> = props => {
     const seriesConfig =
       chartType === 'bar'
         ? {
-            type: 'bar',
-            data: data.map(d => d.value),
+          type: 'bar',
+          data: data.map(d => d.value),
+          itemStyle: {
+            color: '#4dd9ff',
+          },
+          emphasis: {
+            focus: 'series',
             itemStyle: {
               color: '#4dd9ff',
+              borderColor: '#fff',
+              borderWidth: 2,
             },
-            emphasis: {
-              focus: 'series',
-              itemStyle: {
-                color: '#4dd9ff',
-                borderColor: '#fff',
-                borderWidth: 2,
-              },
-            },
-          }
+          },
+        }
         : {
-            type: 'line',
-            data: data.map(d => d.value),
-            smooth: true,
-            lineStyle: {
-              color: '#4dd9ff',
-              width: 2,
+          type: 'line',
+          data: data.map(d => d.value),
+          smooth: true,
+          lineStyle: {
+            color: '#4dd9ff',
+            width: 2,
+          },
+          itemStyle: {
+            color: '#4dd9ff',
+          },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                {
+                  offset: 0,
+                  color: 'rgba(77, 217, 255, 0.3)',
+                },
+                {
+                  offset: 1,
+                  color: 'rgba(77, 217, 255, 0.05)',
+                },
+              ],
             },
+          },
+          symbol: 'circle',
+          symbolSize: 4,
+          emphasis: {
+            focus: 'series',
             itemStyle: {
               color: '#4dd9ff',
+              borderColor: '#fff',
+              borderWidth: 2,
             },
-            areaStyle: {
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
-                colorStops: [
-                  {
-                    offset: 0,
-                    color: 'rgba(77, 217, 255, 0.3)',
-                  },
-                  {
-                    offset: 1,
-                    color: 'rgba(77, 217, 255, 0.05)',
-                  },
-                ],
-              },
-            },
-            symbol: 'circle',
-            symbolSize: 4,
-            emphasis: {
-              focus: 'series',
-              itemStyle: {
-                color: '#4dd9ff',
-                borderColor: '#fff',
-                borderWidth: 2,
-              },
-            },
-          }
+          },
+        }
 
     return {
       title: {
@@ -579,6 +502,12 @@ const Component: React.FC<ComponentProps> = props => {
     async function RESystemSelElement() {
       console.log('-- 鼠标探测模型事件 --', BlackHole3D.Probe.getCurCombProbeRet())
       const res = BlackHole3D.Probe.getCurCombProbeRet()
+
+      // 如果是搅拌桩设备，交由 SheBei 组件处理，此处不弹窗
+      if (res?.ancText?.includes('搅拌桩')) {
+        return
+      }
+
       const childNodeId = res.elemId
       const dataSetId = res.dataSetId
       const data: dataItem | null | undefined = await fetchData(childNodeId, dataSetId)
@@ -594,9 +523,9 @@ const Component: React.FC<ComponentProps> = props => {
         setChartsData(convertChartData(mergedChartItems))
         setInternalVisible(true)
       } else {
-        // 如果接口无数据，则尝试使用兜底数据（基于区块号）
-        const qukuaihao = res?.ancText || '' // 期望格式如 "A4-2#..."，没有则为空
-        const key = (qukuaihao || '').replace(/[^0-9a-z]/gi, '').toUpperCase()
+        // 如果接口无数据，则尝试使用兜底数据（基于桩号）
+        const zhuanghao = res?.ancText || '' // 期望格式如 "SN-10-147"，没有则为空
+        const key = (zhuanghao || '').replace(/[^0-9a-z]/gi, '').toUpperCase()
         const fallback = key ? fallbackDataMap[key] : defaultData
         setStationInfo(fallback || defaultData)
         const mergedChartItems: ChartDataItem[] = [
@@ -620,19 +549,19 @@ const Component: React.FC<ComponentProps> = props => {
         style={
           __RUN_ON_LOCAL__
             ? {
-                width: '100%',
-                height: '100vh',
-              }
+              width: '100%',
+              height: '100vh',
+            }
             : {
-                ...style,
-                width: '1000px',
-                height: '650px',
-                backgroundColor: 'transparent',
-                left: 0,
-                top: 0,
-                display: 'flex',
-                transform: `translate(${style?.left}px, ${style?.top}px)`,
-              }
+              ...style,
+              width: '1000px',
+              height: '650px',
+              backgroundColor: 'transparent',
+              left: 0,
+              top: 0,
+              display: 'flex',
+              transform: `translate(${style?.left}px, ${style?.top}px)`,
+            }
         }
       >
         <div className={styles.modalOverlay} onClick={handleClose}>

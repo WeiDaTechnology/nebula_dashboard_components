@@ -1,5 +1,5 @@
 import './public-path.js'
-import type React from 'react'
+import  React from 'react'
 import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import Component from './component/index'

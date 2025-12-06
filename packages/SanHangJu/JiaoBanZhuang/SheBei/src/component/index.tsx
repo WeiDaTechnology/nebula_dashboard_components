@@ -1,22 +1,19 @@
-import type React from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import React from 'react'
+import { useEffect, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
 
 declare const BlackHole3D: any
 declare const __RUN_ON_LOCAL__: boolean
 
-interface MixerPileData {
+interface DataItem {
   /** 桩号 */
   pileNumber: string
   /** 开始时间 */
   startTime: string
   /** 结束时间 */
   endTime: string
-  /** 桩顶标高 */
-  pileTopElevation: string
-  /** 桩底标高 */
-  pileBottomElevation: string
+
   /** 桩长（m） */
   pileLength: string | number
   /** 桩径（m） */
@@ -41,49 +38,7 @@ interface ComponentProps extends ContainerProps {
   /** 关闭回调 */
   onClose?: () => void
   /** 透传的设备数据，便于外部控制和本地调试 */
-  data?: MixerPileData
-}
-
-const fallbackDataMap: Record<string, MixerPileData> = {
-  '1': {
-    pileNumber: 'JBZ-001',
-    startTime: '2025-01-10 08:30',
-    endTime: '2025-01-10 09:15',
-    pileTopElevation: '12.50m',
-    pileBottomElevation: '-8.20m',
-    pileLength: 20.7,
-    pileDiameter: 0.8,
-    durationMinutes: 45,
-    slurryUsage: '5.2m³',
-    cementUsage: '4.6m³',
-    deviceName: '1号机',
-  },
-  '2': {
-    pileNumber: 'JBZ-002',
-    startTime: '2025-01-10 09:40',
-    endTime: '2025-01-10 10:28',
-    pileTopElevation: '12.30m',
-    pileBottomElevation: '-8.00m',
-    pileLength: 20.3,
-    pileDiameter: 0.8,
-    durationMinutes: 48,
-    slurryUsage: '5.0m³',
-    cementUsage: '4.4m³',
-    deviceName: '2号机',
-  },
-  '3': {
-    pileNumber: 'JBZ-003',
-    startTime: '2025-01-10 10:50',
-    endTime: '2025-01-10 11:45',
-    pileTopElevation: '12.10m',
-    pileBottomElevation: '-8.10m',
-    pileLength: 20.2,
-    pileDiameter: 0.8,
-    durationMinutes: 55,
-    slurryUsage: '5.4m³',
-    cementUsage: '4.7m³',
-    deviceName: '3号机',
-  },
+  data?: DataItem
 }
 
 const Component: React.FC<ComponentProps> = props => {
@@ -91,13 +46,15 @@ const Component: React.FC<ComponentProps> = props => {
   const { styles } = useStyles()
 
   const [internalVisible, setInternalVisible] = useState(false)
-  const [stationInfo, setStationInfo] = useState<MixerPileData | null>(null)
+  const [stationInfo, setStationInfo] = useState<DataItem | null>(null)
 
-  const defaultData = useMemo(() => data || fallbackDataMap['1'], [data])
+  // 优先显示传入的数据，否则显示接口获取的数据
+  const currentData = data || stationInfo
 
-  const isOnlineStatus = isOnline
-  const statusText = isOnline ? '在线' : '离线'
-  const titleText = stationInfo?.deviceName || title
+  // 状态处理：如果有数据则视为在线（或根据具体字段判断），否则使用默认
+  const isOnlineStatus = currentData ? true : isOnline
+  const statusText = isOnlineStatus ? '在线' : '离线'
+  const titleText = currentData?.pileNumber || title
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
 
@@ -109,6 +66,7 @@ const Component: React.FC<ComponentProps> = props => {
     onClose?.()
   }
 
+  // ...
   const formatValue = (value: string | number | undefined, unit?: string): string => {
     if (value === undefined || value === null || value === '') {
       return unit ? `/${unit}` : '/'
@@ -119,53 +77,74 @@ const Component: React.FC<ComponentProps> = props => {
     return unit ? `${value}${unit}` : String(value)
   }
 
-  // 本地调试：直接展示一条默认数据
+  // 现场模式：监听三维场景选中事件，按设备号匹配数据
   useEffect(() => {
-    if (__RUN_ON_LOCAL__) {
-      setStationInfo(defaultData)
-      setInternalVisible(true)
-    }
-  }, [defaultData])
+    const handler = async () => {
+      const element = BlackHole3D?.Probe?.getCurCombProbeRet().elemId
+      if (
+        !BlackHole3D.Anchor.getAllAnc()
+          .map((item: any) => item.ancName)
+          .includes(element)
+      )
+        return
+      const ancData = BlackHole3D.Anchor.getAnc(element)
+      // textInfo "2#搅拌桩"
+      if (!ancData.textInfo.includes('搅拌桩')) return
 
-  // 现场模式：监听三维场景选中事件，按设备号匹配假数据
-  useEffect(() => {
-    const handler = () => {
+      const number = ancData.textInfo.split('#')[0] // 设备号码，例如 "4"
+
       try {
-        const element = BlackHole3D?.Probe?.getCurCombProbeRet?.()?.elemId
-        const anchorNames = BlackHole3D?.Anchor?.getAllAnc?.()?.map((item: any) => item.ancName) || []
-        if (!(element && anchorNames.includes(element))) return
+        // 请求接口数据
+        const response: { data: DataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+          data: {
+            dataSetUuid: '9f6abc6d12764dd3b608517ead986b11',
+            params: {
+              pileNumber: `桩机${number}`,
+            },
+          },
+        })
+        /** {
+  "colAlias": null,
+  "colDesc": "桩号",
+  "colDisplayName": "pileNumber",
+  "colName": "input_oyigkl",
+  "colType": "varchar",
+  "dataSetColUuid": null,
+  "dataSetUuid": null,
+  "ownedOrgType": null,
+  "projectId": null
+} */
 
-        const ancData = BlackHole3D?.Anchor?.getAnc?.(element)
-        const textInfo: string = ancData?.textInfo || ''
-        if (!textInfo.includes('搅拌桩')) return
+        const currentDeviceData = response.data?.[0]
+        console.log('搅拌桩接口返回数据:', currentDeviceData)
 
-        const number = (textInfo.split('#')[0] || '').trim()
-        const matchedData = fallbackDataMap[number] || defaultData
-
-        setStationInfo(matchedData)
-        setInternalVisible(true)
+        if (currentDeviceData) {
+          setStationInfo(currentDeviceData)
+          setInternalVisible(true)
+        } else {
+          console.warn(`未找到桩机${number}的数据`)
+        }
+        // ...
       } catch (error) {
-        console.error('处理搅拌桩弹窗失败 >>> ', error)
+        console.error('获取设备数据失败 >>>> ', error)
       }
     }
 
     document.addEventListener('RESystemSelShpElement', handler)
+
+    // 组件卸载时自动取消监听
     return () => {
       document.removeEventListener('RESystemSelShpElement', handler)
     }
-  }, [defaultData])
-
+  }, [])
   const rows = [
-    { label: '桩号', value: stationInfo?.pileNumber },
-    { label: '开始时间', value: stationInfo?.startTime },
-    { label: '结束时间', value: stationInfo?.endTime },
-    { label: '桩顶标高', value: stationInfo?.pileTopElevation },
-    { label: '桩底标高', value: stationInfo?.pileBottomElevation },
-    { label: '桩长（m）', value: stationInfo?.pileLength },
-    { label: '桩径（m）', value: stationInfo?.pileDiameter },
-    { label: '施工用时（分钟）', value: stationInfo?.durationMinutes },
-    { label: '泥浆用量', value: stationInfo?.slurryUsage },
-    { label: '实际水泥用量', value: stationInfo?.cementUsage },
+    { label: '桩号', value: currentData?.pileNumber },
+    { label: '开始时间', value: currentData?.startTime },
+    { label: '结束时间', value: currentData?.endTime },
+    { label: '桩长（m）', value: currentData?.pileLength },
+    { label: '桩径（m）', value: currentData?.pileDiameter },
+    { label: '施工用时（分钟）', value: currentData?.durationMinutes },
+    { label: '泥浆用量', value: currentData?.slurryUsage }
   ]
 
   return (
@@ -174,19 +153,19 @@ const Component: React.FC<ComponentProps> = props => {
         style={
           __RUN_ON_LOCAL__
             ? {
-                width: '100%',
-                height: '100vh',
-              }
+              width: '100%',
+              height: '100vh',
+            }
             : {
-                ...style,
-                width: '640px',
-                height: '540px',
-                backgroundColor: 'transparent',
-                left: 0,
-                top: 0,
-                display: 'flex',
-                transform: `translate(${style?.left}px, ${style?.top}px)`,
-              }
+              ...style,
+              width: '640px',
+              height: '540px',
+              backgroundColor: 'transparent',
+              left: 0,
+              top: 0,
+              display: 'flex',
+              transform: `translate(${style?.left}px, ${style?.top}px)`,
+            }
         }
       >
         <div className={styles.modalOverlay} onClick={handleClose}>
