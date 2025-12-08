@@ -21,7 +21,12 @@ const Component: FC<any> = props => {
   const [icon_url, setIconUrl] = useState('')
   const ticks = [0, 20, 40, 60, 80, 90, 100]
   // const value = Math.max(0, Math.min(100, dataSourceData.processedData[0][0].value ?? 65.0))
-  const value = Number(dataSourceData.processedData?.[0]?.[0]?.value ?? 0)
+  // const value = Number(dataSourceData.processedData?.[0]?.[0]?.value ?? 0)
+
+  // 根据配置字段名，去获取对应字段的值
+  const indicatorFieldName = dataSourceData?.chartDataConfig?.indicator?.[0]?.fieldName
+  const value = dataSourceData?.processedData?.[0]?.find((item: any) => item?.fieldName === indicatorFieldName)?.value
+
   const duration = Math.max(0, Number(props?.animation_duration ?? 400))
 
   const [renderValue, setRenderValue] = useState(is_open_animation ? 0 : value)
