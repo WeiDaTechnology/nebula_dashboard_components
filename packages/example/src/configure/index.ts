@@ -19,57 +19,33 @@ export const configure: Configure = [
             componentName: 'ChartDataSetter',
             props: {
               isRepeatDrag: false,
-              maxCount: 100,
+              maxCount: 1,
               isShowFormSource: true,
               indicator: {
                 title: '数据',
-                options: ['chartDisplayName', 'format'],
-                max: 100,
+                options: [
+                  'chartDisplayName',
+                  // TODO 这里要不要不开启格式化 如果开启格式化 会处理小数和百分比 那配置里面的后缀是不是就冲突了
+                  // 'format'
+                ],
+                max: 1,
               },
               defaultValue: {
                 constant: {
-                  data: [
-                    { name: '采矿', type: '用电量', value: '12,500' },
-                    { name: '采矿', type: '用水量', value: '280,000' },
-                    { name: '采矿', type: '燃料', value: '25' },
-                    { name: '选矿', type: '用电量', value: '21,300' },
-                    { name: '选矿', type: '用水量', value: '485,000' },
-                    { name: '选矿', type: '燃料', value: '42' },
-                    { name: '焙烧', type: '用电量', value: '29,800' },
-                    { name: '焙烧', type: '用水量', value: '620,000' },
-                    { name: '焙烧', type: '燃料', value: '58' },
-                    { name: '冶炼', type: '用电量', value: '45,200' },
-                    { name: '冶炼', type: '用水量', value: '820,000' },
-                    { name: '冶炼', type: '燃料', value: '75' },
-                  ],
                   originalData: [
-                    { name: '采矿', type: '用电量', value: '12,500' },
-                    { name: '采矿', type: '用水量', value: '280,000' },
-                    { name: '采矿', type: '燃料', value: '25' },
-                    { name: '选矿', type: '用电量', value: '21,300' },
-                    { name: '选矿', type: '用水量', value: '485,000' },
-                    { name: '选矿', type: '燃料', value: '42' },
-                    { name: '焙烧', type: '用电量', value: '29,800' },
-                    { name: '焙烧', type: '用水量', value: '620,000' },
-                    { name: '焙烧', type: '燃料', value: '58' },
-                    { name: '冶炼', type: '用电量', value: '45,200' },
-                    { name: '冶炼', type: '用水量', value: '820,000' },
-                    { name: '冶炼', type: '燃料', value: '75' },
+                    {
+                      百分比: '50.20',
+                    },
+                  ],
+                  data: [
+                    {
+                      百分比: '50.20',
+                    },
                   ],
                   fieldList: [
                     {
-                      fieldName: 'name',
-                      fieldDisplayName: 'name',
-                      fieldType: 'LONGTEXT',
-                    },
-                    {
-                      fieldName: 'type',
-                      fieldDisplayName: 'type',
-                      fieldType: 'LONGTEXT',
-                    },
-                    {
-                      fieldName: 'value',
-                      fieldDisplayName: 'value',
+                      fieldName: '百分比',
+                      fieldDisplayName: '百分比',
                       fieldType: 'DECIMAL',
                     },
                   ],

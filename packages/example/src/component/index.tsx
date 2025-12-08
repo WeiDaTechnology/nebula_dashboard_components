@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/style/noNestedTernary: <explanation> */
 import type * as React from 'react'
 import { useEffect, useState } from 'react'
 import type { ContainerProps } from '..'
@@ -43,15 +42,25 @@ const Component: React.FC<ComponentProps> = props => {
     letterSpacing = 0,
   } = style
 
-  const value = dataSourceData?.processedData?.[0]?.[0]?.value || 0
+  // 根据配置字段名，去获取对应字段的值
+  const indicatorFieldName = dataSourceData?.chartDataConfig?.indicator?.[0]?.fieldName
+  const value = dataSourceData?.processedData?.[0]?.find(item => item?.fieldName === indicatorFieldName)?.value
 
   // 进度条设置
-  const percentRaw = value * 100
+  const percentRaw = value
   const targetPercent = Math.max(0, Math.min(100, percentRaw)) // 限制在0-100范围
   const [currentPercent, setCurrentPercent] = useState(entryAnimiationisShow ? 0 : targetPercent)
 
   // 尺寸
-  const toNumber = (v: any) => (typeof v === 'number' ? v : typeof v === 'string' ? Number.parseFloat(v) : undefined)
+  const toNumber = (v: any) => {
+    if (typeof v === 'number') {
+      return v
+    }
+    if (typeof v === 'string') {
+      return Number.parseFloat(v)
+    }
+    return
+  }
   const w = toNumber(width) // 容器宽度
   const h = toNumber(height) // 容器高度
   const sizeBase = 300 // 基础尺寸
