@@ -19,54 +19,18 @@ export const configure: Configure = [
             componentName: 'ChartDataSetter',
             props: {
               isRepeatDrag: false,
-              maxCount: 100,
+              maxCount: 1,
               isShowFormSource: true,
               indicator: {
                 title: '数据',
                 options: ['chartDisplayName', 'format'],
-                max: 100,
+                max: 1,
               },
               defaultValue: {
                 constant: {
-                  data: [
-                    { name: '采矿', type: '用电量', value: '12,500' },
-                    { name: '采矿', type: '用水量', value: '280,000' },
-                    { name: '采矿', type: '燃料', value: '25' },
-                    { name: '选矿', type: '用电量', value: '21,300' },
-                    { name: '选矿', type: '用水量', value: '485,000' },
-                    { name: '选矿', type: '燃料', value: '42' },
-                    { name: '焙烧', type: '用电量', value: '29,800' },
-                    { name: '焙烧', type: '用水量', value: '620,000' },
-                    { name: '焙烧', type: '燃料', value: '58' },
-                    { name: '冶炼', type: '用电量', value: '45,200' },
-                    { name: '冶炼', type: '用水量', value: '820,000' },
-                    { name: '冶炼', type: '燃料', value: '75' },
-                  ],
-                  originalData: [
-                    { name: '采矿', type: '用电量', value: '12,500' },
-                    { name: '采矿', type: '用水量', value: '280,000' },
-                    { name: '采矿', type: '燃料', value: '25' },
-                    { name: '选矿', type: '用电量', value: '21,300' },
-                    { name: '选矿', type: '用水量', value: '485,000' },
-                    { name: '选矿', type: '燃料', value: '42' },
-                    { name: '焙烧', type: '用电量', value: '29,800' },
-                    { name: '焙烧', type: '用水量', value: '620,000' },
-                    { name: '焙烧', type: '燃料', value: '58' },
-                    { name: '冶炼', type: '用电量', value: '45,200' },
-                    { name: '冶炼', type: '用水量', value: '820,000' },
-                    { name: '冶炼', type: '燃料', value: '75' },
-                  ],
+                  data: [{ value: '0.65' }],
+                  originalData: [{ value: '0.65' }],
                   fieldList: [
-                    {
-                      fieldName: 'name',
-                      fieldDisplayName: 'name',
-                      fieldType: 'LONGTEXT',
-                    },
-                    {
-                      fieldName: 'type',
-                      fieldDisplayName: 'type',
-                      fieldType: 'LONGTEXT',
-                    },
                     {
                       fieldName: 'value',
                       fieldDisplayName: 'value',
@@ -285,24 +249,24 @@ export const configure: Configure = [
         layout: 'CollapsePanel',
         title: '文本样式',
         items: [
-          {
-            name: 'Height',
-            title: '高度',
-            inline: {
-              flex: '1 1 100%',
-            },
-            setter: {
-              componentName: 'NumberSetter',
-              props: {
-                fieldProps: {
-                  min: 0,
-                  max: 100,
-                  placeholder: '请输入高度(单位:px)',
-                  defaultValue: 20,
-                },
-              },
-            },
-          },
+          // {
+          //   name: 'Height',
+          //   title: '高度',
+          //   inline: {
+          //     flex: '1 1 100%',
+          //   },
+          //   setter: {
+          //     componentName: 'NumberSetter',
+          //     props: {
+          //       fieldProps: {
+          //         min: 0,
+          //         max: 100,
+          //         placeholder: '请输入高度(单位:px)',
+          //         defaultValue: 20,
+          //       },
+          //     },
+          //   },
+          // },
           {
             name: 'Radius',
             title: '圆角',
@@ -316,7 +280,7 @@ export const configure: Configure = [
                   min: 0,
                   max: 50,
                   placeholder: '请输入圆角(单位:px)',
-                  defaultValue: 10,
+                  defaultValue: 12,
                 },
               },
             },
@@ -334,7 +298,7 @@ export const configure: Configure = [
                   min: 0,
                   max: 50,
                   placeholder: '请输入刻度字体大小(单位:px)',
-                  defaultValue: 10,
+                  defaultValue: 16,
                 },
               },
             },
@@ -344,6 +308,9 @@ export const configure: Configure = [
             title: '刻度字体颜色',
             setter: {
               componentName: 'ColorSetter',
+              props: {
+                defaultValue: '#000000',
+              },
             },
           },
           {
@@ -359,7 +326,7 @@ export const configure: Configure = [
                   min: 0,
                   max: 50,
                   placeholder: '请输入进度字体大小(单位:px)',
-                  defaultValue: 10,
+                  defaultValue: 18,
                 },
               },
             },
@@ -373,42 +340,21 @@ export const configure: Configure = [
           },
           {
             name: 'color1',
-            title: '进度条渐变色1',
+            title: '进度条颜色',
             setter: {
               componentName: 'ColorSetter',
-            },
-          },
-          {
-            name: 'color2',
-            title: '进度条渐变色2',
-            setter: {
-              componentName: 'ColorSetter',
-            },
-          },
-          {
-            name: 'head_icon',
-            title: '头部图标',
-            inline: {
-              flex: '1 1 100%',
-            },
-            setter: {
-              componentName: 'CommonUploadSetter',
               props: {
-                acceptFormatSuffix: ['flac', 'webm', 'weba', 'wav', 'ogg', 'mp3', 'png', 'jpg', 'jpeg'],
-                formatMap: {
-                  flac: 'flac',
-                  webm: 'webm',
-                  weba: 'weba',
-                  wav: 'wav',
-                  ogg: 'ogg',
-                  mp3: 'mp3',
-                  png: 'png',
-                  jpg: 'jpg',
-                  jpeg: 'jpeg',
-                },
+                defaultValue: '#1DDBE6',
               },
             },
           },
+          // {
+          //   name: 'color2',
+          //   title: '进度条渐变色2',
+          //   setter: {
+          //     componentName: 'ColorSetter',
+          //   },
+          // },
         ],
       },
       {

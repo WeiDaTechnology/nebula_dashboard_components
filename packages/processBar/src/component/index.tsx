@@ -3,17 +3,16 @@ import runImg from '../asserts/run.png'
 
 const IMAGE_BASE_URL = '/api/bjfiles/filesFilter/'
 
-// 三元运算符导致的爆红
 const Component: FC<any> = props => {
   const {
-    is_open_animation,
-    is_reverse,
-    Radius,
+    is_open_animation = true,
+    is_reverse = false,
+    Radius = 12,
     head_icon,
-    color1 = '#2984D9',
-    color2 = '#1DDBE6',
-    scale_font_size,
-    progress_font_size,
+    color1 = '#1DDBE6',
+    // color2 = '#2984D9',
+    scale_font_size = 16,
+    progress_font_size = 18,
     dataSourceData,
     startLoad,
     onLoad,
@@ -22,7 +21,7 @@ const Component: FC<any> = props => {
   const [icon_url, setIconUrl] = useState('')
   const ticks = [0, 20, 40, 60, 80, 90, 100]
   // const value = Math.max(0, Math.min(100, dataSourceData.processedData[0][0].value ?? 65.0))
-  const value = Number(dataSourceData.processedData?.[0]?.[0]?.value ?? 0) * 100
+  const value = Number(dataSourceData.processedData?.[0]?.[0]?.value ?? 0)
   const duration = Math.max(0, Number(props?.animation_duration ?? 400))
 
   const [renderValue, setRenderValue] = useState(is_open_animation ? 0 : value)
@@ -40,10 +39,8 @@ const Component: FC<any> = props => {
     }
     return url
   }, [])
-  // startLoad()
-  // onLoad()
 
-  console.log('props.__designMode', dataSourceData)
+  // console.log('props.__designMode', dataSourceData)
 
   useEffect(() => {
     setIconUrl(buildImageUrl(head_icon))
@@ -53,7 +50,7 @@ const Component: FC<any> = props => {
     if (is_open_animation) {
       // 触发开始加载回调
       if (props.__designMode === 'preview') {
-        startLoad()
+        startLoad?.()
       }
 
       if (is_reverse) {
@@ -71,7 +68,7 @@ const Component: FC<any> = props => {
             rafId = requestAnimationFrame(step)
           } else if (props.__designMode === 'preview') {
             // 加载结束,触发回调
-            onLoad()
+            onLoad?.()
           }
         }
         rafId = requestAnimationFrame(step)
@@ -91,7 +88,7 @@ const Component: FC<any> = props => {
           rafId = requestAnimationFrame(step)
         } else if (props.__designMode === 'preview') {
           // 加载结束,触发回调
-          onLoad()
+          onLoad?.()
         }
       }
       rafId = requestAnimationFrame(step)
@@ -103,8 +100,8 @@ const Component: FC<any> = props => {
     }
     // 无动画模式,直接触发开始和结束回调
     if (props.__designMode === 'preview') {
-      startLoad()
-      onLoad()
+      startLoad?.()
+      onLoad?.()
     }
   }, [is_open_animation, value, duration, is_reverse, startLoad, onLoad, props.__designMode])
 
@@ -143,9 +140,10 @@ const Component: FC<any> = props => {
                 width: `${renderValue}%`,
                 height: '100%',
                 // backgroundImage: is_reverse ? "linear-gradient(270deg, #2984D9 0%, #1DDBE6 100%)" : "linear-gradient(90deg, #2984D9 0%, #1DDBE6 100%)",
-                backgroundImage: is_reverse
-                  ? `linear-gradient(270deg, ${color1} 0%, ${color2} 100%)`
-                  : `linear-gradient(90deg, ${color1} 0%, ${color2} 100%)`,
+                // backgroundImage: is_reverse
+                //   ? `linear-gradient(270deg, ${color1} 0%, ${color2} 100%)`
+                //   : `linear-gradient(90deg, ${color1} 0%, ${color2} 100%)`,
+                backgroundColor: color1,
                 borderRadius: `${Radius ?? 12}px`,
                 transition: `width ${transitionDuration}ms linear`,
                 marginLeft: is_reverse ? 'auto' : '0',
