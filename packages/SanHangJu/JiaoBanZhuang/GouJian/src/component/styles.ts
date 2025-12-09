@@ -168,16 +168,18 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      height: 100%;
 
       @media (max-width: 768px) {
         flex: 1;
+        height: auto;
       }
     `,
     rightPanel: css`
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
       height: 100%;
       overflow-y: auto;
     `,
@@ -186,7 +188,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       background: rgba(15, 25, 40, 0.6);
       border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 4px;
-      padding: 6px 6px 4px;
+      padding: 4px 4px 2px;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -220,6 +222,8 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 3px;
       pointer-events: none;
+      flex: 1;
+      min-height: 0;
     `,
     label: css`
       color: #fff;

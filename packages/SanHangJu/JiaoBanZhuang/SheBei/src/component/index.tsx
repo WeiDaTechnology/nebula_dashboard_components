@@ -77,7 +77,7 @@ const Component: React.FC<ComponentProps> = props => {
   // 状态处理：如果有数据则视为在线（或根据具体字段判断），否则使用默认
   const isOnlineStatus = currentData ? true : isOnline
   const statusText = isOnlineStatus ? '在线' : '离线'
-  const titleText = currentData?.pileNumber || title
+  const titleText = currentData?.deviceName || title
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
 
@@ -131,6 +131,8 @@ const Component: React.FC<ComponentProps> = props => {
         if (backendData) {
           // 转换后端数据为前端格式
           const currentDeviceData = transformBackendData(backendData)
+          // 将 ancData.textInfo 作为设备名称存入
+          currentDeviceData.deviceName = ancData.textInfo
           setStationInfo(currentDeviceData)
           setInternalVisible(true)
         } else {
