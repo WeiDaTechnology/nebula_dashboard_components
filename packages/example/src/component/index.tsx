@@ -25,6 +25,8 @@ const Component: React.FC<ComponentProps> = props => {
     innerRadius = 0.5,
     direction = 'clockwise',
     dataSourceData,
+    processedDataFunc,
+    __designMode,
   } = props as any
 
   const {
@@ -42,12 +44,17 @@ const Component: React.FC<ComponentProps> = props => {
     letterSpacing = 0,
   } = style
 
-  // 根据配置字段名，去获取对应字段的值
-  const indicatorFieldName = dataSourceData?.chartDataConfig?.indicator?.[0]?.fieldName
-  const value = dataSourceData?.processedData?.[0]?.find(item => item?.fieldName === indicatorFieldName)?.value
+  // 获取对应字段的数据
+  const { rawChartData } =
+    processedDataFunc?.({
+      designMode: __designMode,
+      chartType: 'CUSTOM',
+      chartDataConfig: dataSourceData?.chartDataConfig,
+    }) || {}
+  const valueData = rawChartData?.[0] || []
 
-  // 进度条设置
-  const percentRaw = value
+  const percentRaw = Object.values(valueData)?.[0] as number
+
   const targetPercent = Math.max(0, Math.min(100, percentRaw)) // 限制在0-100范围
   const [currentPercent, setCurrentPercent] = useState(entryAnimiationisShow ? 0 : targetPercent)
 
