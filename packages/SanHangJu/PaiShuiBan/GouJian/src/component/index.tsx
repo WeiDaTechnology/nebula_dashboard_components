@@ -251,9 +251,16 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     autoBoxParam: false,
     skipErrorThrower: true,
   })
-  const qukuaihao = elementParam?.elementParams
-    ?.find?.((e: any) => e.group === '用户定义属性')
-    ?.data?.find?.((e: any) => e?.paramName === '区块号')?.paramValue
+  let qukuaihao
+  elementParam?.elementParams
+    ?.find?.((group: any) => {
+      console.log('group', group)
+      const flag = group?.data?.find?.((e: any) => e?.paramName === '区块号')
+      if(flag?.paramValue) {
+        qukuaihao = flag?.paramValue
+      }
+      return !!flag
+    })
 
   // qukuaihao = 'A4-2'
   if (!qukuaihao) {
