@@ -101,7 +101,7 @@ const Component: React.FC<ComponentProps> = props => {
       )
         return
       const ancData = BlackHole3D.Anchor.getAnc(element)
-     
+
       const number = ancData.textInfo[0] // 设备号码，例如 "4"
 
       try {

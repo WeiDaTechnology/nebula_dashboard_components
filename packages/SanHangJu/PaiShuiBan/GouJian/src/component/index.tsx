@@ -1,5 +1,5 @@
 import ReactECharts from 'echarts-for-react'
-import * as React from 'react'
+import type * as React from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
@@ -135,8 +135,8 @@ const MOCK_STATION_INFO: dataItem = {
   depth: 173.06,
   piles_scribe: 'A4-2',
   latitude: 39.9042,
-  end_time: 1761186120,
-  begin_time: 1760602418,
+  end_time: 1_761_186_120,
+  begin_time: 1_760_602_418,
   longitude: 116.4074,
   part_count: 8,
   workDuration: 162.14,
@@ -252,15 +252,14 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     skipErrorThrower: true,
   })
   let qukuaihao
-  elementParam?.elementParams
-    ?.find?.((group: any) => {
-      console.log('group', group)
-      const flag = group?.data?.find?.((e: any) => e?.paramName === '区块号')
-      if(flag?.paramValue) {
-        qukuaihao = flag?.paramValue
-      }
-      return !!flag
-    })
+  elementParam?.elementParams?.find?.((group: any) => {
+    console.log('group', group)
+    const flag = group?.data?.find?.((e: any) => e?.paramName === '区块号')
+    if (flag?.paramValue) {
+      qukuaihao = flag?.paramValue
+    }
+    return !!flag
+  })
 
   // qukuaihao = 'A4-2'
   if (!qukuaihao) {
