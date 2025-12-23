@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import { useEffect, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
@@ -9,47 +9,117 @@ declare const __RUN_ON_LOCAL__: boolean
 interface DataItem {
   /** 桩号 */
   pileNumber: string
-  /** 开始时间 */
-  startTime: string
-  /** 结束时间 */
-  endTime: string
-  /** 桩长（m） */
-  pileLength: string | number
-  /** 桩径（m） */
+  /** 桩径（mm） */
   pileDiameter: string | number
-  /** 加固土量 */
-  total: string | number
+  /** 钻孔深度（m） */
+  depth: string | number
+  /** 开始时间 */
+  time: string
+  /** 下沉/提升速度（m/min） */
+  sinkingLift: string | number
+  /** 瞬时浆量（L/min） */
+  instantaneous: string | number
+  /** 累计浆量（m³） */
+  cumulative: string | number
+  /** 倾斜角度X（°） */
+  tiltX: string | number
+  /** 倾斜角度Y（°） */
+  tiltY: string | number
+  /** 钻杆电流（A） */
+  current: string | number
+  /** 钻杆转速（r/min） */
+  speed: string | number
   /** 设备名称，展示在标题处 */
   deviceName?: string
 }
+
 /**
  * 后端返回字段映射：
- * input_oyigkl      -> pileNumber    (桩号)        e.g. "SN-14-460"
- * timepicker_9yn01y -> startTime     (开始时间)    e.g. "08:16:00"
- * timepicker_7y5tba -> endTime       (结束时间)    e.g. "10:51:00"
- * numberinput_ud2fax-> pileLength    (桩长)        e.g. 29.5
- * numberinput_adav79-> pileDiameter  (桩径)        e.g. 1
- * numberinput_91nj00-> total         (加固土量)    e.g. 23.16
+ * pileNumber    -> pileNumber      (桩号)           e.g. "SN-15-47"
+ * pileDiameter  -> pileDiameter    (桩径)           e.g. "1000"
+ * depth         -> depth           (钻孔深度)       e.g. "8.59"
+ * time          -> time            (开始时间)       e.g. "2025-12-23 12:53:11"
+ * sinkingIift   -> sinkingLift     (下沉/提升速度)  e.g. "0.46"
+ * instantaneous -> instantaneous   (瞬时浆量)       e.g. "100"
+ * cumulative    -> cumulative      (累计浆量)       e.g. "1.7075"
+ * tiltX         -> tiltX           (倾斜角度X)      e.g. "-0.23"
+ * tiltY         -> tiltY           (倾斜角度Y)      e.g. "-0.23"
+ * current       -> current         (钻杆电流)       e.g. "39.7"
+ * speed         -> speed           (钻杆转速)       e.g. "19.0"
  */
 
 /** 后端原始返回数据结构 */
 interface BackendDataItem {
-  input_oyigkl: string // 桩号
-  timepicker_9yn01y: string // 开始时间
-  timepicker_7y5tba: string // 结束时间
-  numberinput_ud2fax: number // 桩长
-  numberinput_adav79: number // 桩径
-  numberinput_91nj00: number // 加固土量
+  pileNumber: string // 桩号
+  pileDiameter: string // 桩径
+  depth: string // 钻孔深度
+  time: string // 开始时间
+  sinkingIift: string // 下沉/提升速度（注意后端拼写）
+  instantaneous: string // 瞬时浆量
+  cumulative: string // 累计浆量
+  tiltX: string // 倾斜角度X
+  tiltY: string // 倾斜角度Y
+  current: string // 钻杆电流
+  speed: string // 钻杆转速
+}
+
+/** 连接状态接口返回数据结构 */
+interface ConnectionStatusItem {
+  /** 连接状态：0-未知, 1-已连接, 2-超时, 3-断开 */
+  connection_state: number
+}
+
+/** 连接状态枚举 */
+const CONNECTION_STATE = {
+  UNKNOWN: 0,
+  CONNECTED: 1,
+  TIMEOUT: 2,
+  DISCONNECTED: 3,
+} as const
+
+/** 获取连接状态文本 */
+const getConnectionStatusText = (state: number): string => {
+  switch (state) {
+    case CONNECTION_STATE.CONNECTED:
+      return '在线'
+    case CONNECTION_STATE.TIMEOUT:
+      return '超时'
+    case CONNECTION_STATE.DISCONNECTED:
+      return '离线'
+    case CONNECTION_STATE.UNKNOWN:
+    default:
+      return '未知'
+  }
+}
+
+/** 获取连接状态颜色 */
+const getConnectionStatusColor = (state: number): string => {
+  switch (state) {
+    case CONNECTION_STATE.CONNECTED:
+      return '#52c41a' // 绿色
+    case CONNECTION_STATE.TIMEOUT:
+      return '#faad14' // 橙色
+    case CONNECTION_STATE.DISCONNECTED:
+      return '#ff4d4f' // 红色
+    case CONNECTION_STATE.UNKNOWN:
+    default:
+      return '#8c8c8c' // 灰色
+  }
 }
 
 /** 将后端数据转换为前端数据格式 */
 const transformBackendData = (backendData: BackendDataItem): DataItem => ({
-  pileNumber: backendData.input_oyigkl,
-  startTime: backendData.timepicker_9yn01y,
-  endTime: backendData.timepicker_7y5tba,
-  pileLength: backendData.numberinput_ud2fax,
-  pileDiameter: backendData.numberinput_adav79,
-  total: backendData.numberinput_91nj00,
+  pileNumber: backendData.pileNumber,
+  pileDiameter: backendData.pileDiameter,
+  depth: backendData.depth,
+  time: backendData.time,
+  sinkingLift: backendData.sinkingIift, // 注意后端字段拼写为 sinkingIift
+  instantaneous: backendData.instantaneous,
+  cumulative: backendData.cumulative,
+  tiltX: backendData.tiltX,
+  tiltY: backendData.tiltY,
+  current: backendData.current,
+  speed: backendData.speed,
 })
 interface ComponentProps extends ContainerProps {
   /** 弹窗标题 */
@@ -70,13 +140,14 @@ const Component: React.FC<ComponentProps> = props => {
 
   const [internalVisible, setInternalVisible] = useState(false)
   const [stationInfo, setStationInfo] = useState<DataItem | null>(null)
+  const [connectionState, setConnectionState] = useState<number>(CONNECTION_STATE.UNKNOWN)
 
   // 优先显示传入的数据，否则显示接口获取的数据
   const currentData = data || stationInfo
 
-  // 状态处理：如果有数据则视为在线（或根据具体字段判断），否则使用默认
-  const isOnlineStatus = currentData ? true : isOnline
-  const statusText = isOnlineStatus ? '在线' : '离线'
+  // 状态处理：使用接口返回的连接状态
+  const statusText = getConnectionStatusText(connectionState)
+  const statusColor = getConnectionStatusColor(connectionState)
   const titleText = currentData?.deviceName || title
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
@@ -112,21 +183,44 @@ const Component: React.FC<ComponentProps> = props => {
         return
       const ancData = BlackHole3D.Anchor.getAnc(element)
       // textInfo "2#搅拌桩"
-      if (!ancData.textInfo.includes('桩机')) return
+      if (!ancData.textInfo.startsWith('桩')) return
 
       try {
         // 请求接口数据
-        const response: { data: BackendDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
-          data: {
-            dataSetUuid: '9f6abc6d12764dd3b608517ead986b11',
-            params: {
-              pileNumber: ancData.textInfo,
+        const response: { data: BackendDataItem[] } = await window.core.request(
+          'bjgraphicplatform/dataSet/executeQuery',
+          {
+            data: {
+              dataSetUuid: 'bd458c39684946c7a634fa3b5aeb9328',
+              params: {
+                pileDriverName: ancData.textInfo,
+              },
             },
           },
-        })
+        )
+        const statusResponse: { data: ConnectionStatusItem[] } = await window.core.request(
+          'bjgraphicplatform/dataSet/executeQuery',
+          {
+            data: {
+              dataSetUuid: 'e9a0c2b9904140a8b2ddf7ed304c1bfe',
+              params: {
+                boxName: ancData.textInfo,
+              },
+            },
+          },
+        )
 
         const backendData = response.data?.[0]
+        const statusData = statusResponse.data?.[0]
         console.log('搅拌桩接口返回数据:', backendData)
+        console.log('连接状态接口返回数据:', statusData)
+
+        // 更新连接状态
+        if (statusData?.connection_state !== undefined) {
+          setConnectionState(statusData.connection_state)
+        } else {
+          setConnectionState(CONNECTION_STATE.UNKNOWN)
+        }
 
         if (backendData) {
           // 转换后端数据为前端格式
@@ -152,11 +246,16 @@ const Component: React.FC<ComponentProps> = props => {
   }, [])
   const rows = [
     { label: '桩号', value: currentData?.pileNumber },
-    { label: '开始时间', value: currentData?.startTime },
-    { label: '结束时间', value: currentData?.endTime },
-    { label: '桩长（m）', value: currentData?.pileLength },
-    { label: '桩径（m）', value: currentData?.pileDiameter },
-    { label: '加固土量', value: currentData?.total },
+    { label: '桩径', value: currentData?.pileDiameter, unit: 'mm' },
+    { label: '钻孔深度', value: currentData?.depth, unit: 'm' },
+    { label: '开始时间', value: currentData?.time },
+    { label: '下沉/提升速度', value: currentData?.sinkingLift, unit: 'm/min' },
+    { label: '瞬时浆量', value: currentData?.instantaneous, unit: 'L/min' },
+    { label: '累计浆量', value: currentData?.cumulative, unit: 'm³' },
+    { label: '倾斜角度X', value: currentData?.tiltX, unit: '°' },
+    { label: '倾斜角度Y', value: currentData?.tiltY, unit: '°' },
+    { label: '钻杆电流', value: currentData?.current, unit: 'A' },
+    { label: '钻杆转速', value: currentData?.speed, unit: 'r/min' },
   ]
 
   return (
@@ -165,29 +264,26 @@ const Component: React.FC<ComponentProps> = props => {
         style={
           __RUN_ON_LOCAL__
             ? {
-              width: '100%',
-              height: '100vh',
-            }
+                width: '100%',
+                height: '100vh',
+              }
             : {
-              ...style,
-              width: '640px',
-              height: '540px',
-              backgroundColor: 'transparent',
-              left: 0,
-              top: 0,
-              display: 'flex',
-              transform: `translate(${style?.left}px, ${style?.top}px)`,
-            }
+                ...style,
+                width: '640px',
+                height: '680px',
+                backgroundColor: 'transparent',
+                left: 0,
+                top: 0,
+                display: 'flex',
+                transform: `translate(${style?.left}px, ${style?.top}px)`,
+              }
         }
       >
         <div className={styles.modalOverlay} onClick={handleClose}>
           <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
             <div className={styles.header}>
               <div className={styles.statusIndicator}>
-                <span
-                  className={styles.statusDot}
-                  style={{ backgroundColor: isOnlineStatus ? '#52c41a' : '#ff4d4f' }}
-                />
+                <span className={styles.statusDot} style={{ backgroundColor: statusColor }} />
                 <span className={styles.statusText}>{statusText}</span>
               </div>
               <h2 className={styles.title}>{titleText}</h2>
@@ -204,7 +300,7 @@ const Component: React.FC<ComponentProps> = props => {
                 {rows.map(item => (
                   <div className={styles.dataItem} key={item.label}>
                     <span className={styles.label}>{item.label}</span>
-                    <span className={styles.value}>{formatValue(item.value)}</span>
+                    <span className={styles.value}>{formatValue(item.value, item.unit)}</span>
                   </div>
                 ))}
               </div>

@@ -155,7 +155,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     mainLayout: css`
       display: flex;
       gap: 18px;
-      height: 480px;
+      height: 580px;
 
       @media (max-width: 768px) {
         flex-direction: column;
@@ -164,10 +164,10 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       }
     `,
     leftPanel: css`
-      flex: 0 0 360px;
+      flex: 0 0 380px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
       height: 100%;
 
       @media (max-width: 768px) {
@@ -217,7 +217,7 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 9px 12px;
+      padding: 8px 14px;
       background: rgba(15, 25, 40, 0.6);
       border: 1px solid rgba(64, 150, 255, 0.15);
       border-radius: 3px;
@@ -227,18 +227,18 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
     `,
     label: css`
       color: #fff;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 400;
       white-space: nowrap;
       user-select: none;
     `,
     value: css`
       color: #fff;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
       text-align: right;
       text-shadow: 0 0 3px rgba(64, 150, 255, 0.3);
-      min-width: 70px;
+      min-width: 80px;
       user-select: none;
     `,
     // 保留原有的样式以兼容
