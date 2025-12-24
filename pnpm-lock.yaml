@@ -97,7 +97,327 @@ importers:
         specifier: 5.2.2
         version: 5.2.2(webpack-cli@6.0.1)(webpack@5.103.0)
 
-  packages/example:
+  packages/SanHangJu/JiaoBanZhuang/GouJian:
+    dependencies:
+      '@reduxjs/toolkit':
+        specifier: 2.11.0
+        version: 2.11.0(react-redux@8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0))(react@18.1.0)
+      ahooks:
+        specifier: 3.9.6
+        version: 3.9.6(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd:
+        specifier: 5.29.1
+        version: 5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd-style:
+        specifier: 3.7.1
+        version: 3.7.1(@types/react@19.2.7)(antd@5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0))(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      axios:
+        specifier: 1.13.2
+        version: 1.13.2
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
+      echarts:
+        specifier: 6.0.0
+        version: 6.0.0
+      echarts-for-react:
+        specifier: ^3.0.2
+        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
+      js-cookie:
+        specifier: 3.0.5
+        version: 3.0.5
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+      moment:
+        specifier: 2.30.1
+        version: 2.30.1
+      react:
+        specifier: 18.1.0
+        version: 18.1.0
+      react-dom:
+        specifier: 18.1.0
+        version: 18.1.0(react@18.1.0)
+      react-redux:
+        specifier: 8.0.2
+        version: 8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0)
+      react-router-dom:
+        specifier: 6.3.0
+        version: 6.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      redux:
+        specifier: 4.2.0
+        version: 4.2.0
+      stream-browserify:
+        specifier: 3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@types/lodash':
+        specifier: 4.17.21
+        version: 4.17.21
+      '@types/react':
+        specifier: 19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+
+  packages/SanHangJu/JiaoBanZhuang/SheBei:
+    dependencies:
+      '@reduxjs/toolkit':
+        specifier: 2.11.0
+        version: 2.11.0(react-redux@8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0))(react@18.1.0)
+      ahooks:
+        specifier: 3.9.6
+        version: 3.9.6(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd:
+        specifier: 5.29.1
+        version: 5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd-style:
+        specifier: 3.7.1
+        version: 3.7.1(@types/react@19.2.7)(antd@5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0))(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      axios:
+        specifier: 1.13.2
+        version: 1.13.2
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
+      echarts:
+        specifier: 6.0.0
+        version: 6.0.0
+      echarts-for-react:
+        specifier: ^3.0.2
+        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
+      js-cookie:
+        specifier: 3.0.5
+        version: 3.0.5
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+      moment:
+        specifier: 2.30.1
+        version: 2.30.1
+      react:
+        specifier: 18.1.0
+        version: 18.1.0
+      react-dom:
+        specifier: 18.1.0
+        version: 18.1.0(react@18.1.0)
+      react-redux:
+        specifier: 8.0.2
+        version: 8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0)
+      react-router-dom:
+        specifier: 6.3.0
+        version: 6.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      redux:
+        specifier: 4.2.0
+        version: 4.2.0
+      stream-browserify:
+        specifier: 3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@types/lodash':
+        specifier: 4.17.21
+        version: 4.17.21
+      '@types/react':
+        specifier: 19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+
+  packages/SanHangJu/PaiShuiBan/GouJian:
+    dependencies:
+      '@reduxjs/toolkit':
+        specifier: 2.11.0
+        version: 2.11.0(react-redux@8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0))(react@18.1.0)
+      ahooks:
+        specifier: 3.9.6
+        version: 3.9.6(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd:
+        specifier: 5.29.1
+        version: 5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd-style:
+        specifier: 3.7.1
+        version: 3.7.1(@types/react@19.2.7)(antd@5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0))(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      axios:
+        specifier: 1.13.2
+        version: 1.13.2
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
+      echarts:
+        specifier: 6.0.0
+        version: 6.0.0
+      echarts-for-react:
+        specifier: ^3.0.2
+        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
+      js-cookie:
+        specifier: 3.0.5
+        version: 3.0.5
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+      moment:
+        specifier: 2.30.1
+        version: 2.30.1
+      react:
+        specifier: 18.1.0
+        version: 18.1.0
+      react-dom:
+        specifier: 18.1.0
+        version: 18.1.0(react@18.1.0)
+      react-redux:
+        specifier: 8.0.2
+        version: 8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0)
+      react-router-dom:
+        specifier: 6.3.0
+        version: 6.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      redux:
+        specifier: 4.2.0
+        version: 4.2.0
+      stream-browserify:
+        specifier: 3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@types/lodash':
+        specifier: 4.17.21
+        version: 4.17.21
+      '@types/react':
+        specifier: 19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+
+  packages/SanHangJu/PaiShuiBan/SheBei:
+    dependencies:
+      '@reduxjs/toolkit':
+        specifier: 2.11.0
+        version: 2.11.0(react-redux@8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0))(react@18.1.0)
+      ahooks:
+        specifier: 3.9.6
+        version: 3.9.6(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd:
+        specifier: 5.29.1
+        version: 5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd-style:
+        specifier: 3.7.1
+        version: 3.7.1(@types/react@19.2.7)(antd@5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0))(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      axios:
+        specifier: 1.13.2
+        version: 1.13.2
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
+      echarts:
+        specifier: 6.0.0
+        version: 6.0.0
+      echarts-for-react:
+        specifier: ^3.0.2
+        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
+      js-cookie:
+        specifier: 3.0.5
+        version: 3.0.5
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+      moment:
+        specifier: 2.30.1
+        version: 2.30.1
+      react:
+        specifier: 18.1.0
+        version: 18.1.0
+      react-dom:
+        specifier: 18.1.0
+        version: 18.1.0(react@18.1.0)
+      react-redux:
+        specifier: 8.0.2
+        version: 8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0)
+      react-router-dom:
+        specifier: 6.3.0
+        version: 6.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      redux:
+        specifier: 4.2.0
+        version: 4.2.0
+      stream-browserify:
+        specifier: 3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@types/lodash':
+        specifier: 4.17.21
+        version: 4.17.21
+      '@types/react':
+        specifier: 19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+
+  packages/SanHangJu/SuiShiZhuang/GouJian:
+    dependencies:
+      '@reduxjs/toolkit':
+        specifier: 2.11.0
+        version: 2.11.0(react-redux@8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0))(react@18.1.0)
+      ahooks:
+        specifier: 3.9.6
+        version: 3.9.6(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd:
+        specifier: 5.29.1
+        version: 5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      antd-style:
+        specifier: 3.7.1
+        version: 3.7.1(@types/react@19.2.7)(antd@5.29.1(moment@2.30.1)(react-dom@18.1.0(react@18.1.0))(react@18.1.0))(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      axios:
+        specifier: 1.13.2
+        version: 1.13.2
+      buffer:
+        specifier: 6.0.3
+        version: 6.0.3
+      echarts:
+        specifier: 6.0.0
+        version: 6.0.0
+      echarts-for-react:
+        specifier: ^3.0.2
+        version: 3.0.5(echarts@6.0.0)(react@18.1.0)
+      js-cookie:
+        specifier: 3.0.5
+        version: 3.0.5
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+      moment:
+        specifier: 2.30.1
+        version: 2.30.1
+      react:
+        specifier: 18.1.0
+        version: 18.1.0
+      react-dom:
+        specifier: 18.1.0
+        version: 18.1.0(react@18.1.0)
+      react-redux:
+        specifier: 8.0.2
+        version: 8.0.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@18.1.0(react@18.1.0))(react@18.1.0)(redux@4.2.0)
+      react-router-dom:
+        specifier: 6.3.0
+        version: 6.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      redux:
+        specifier: 4.2.0
+        version: 4.2.0
+      stream-browserify:
+        specifier: 3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@types/lodash':
+        specifier: 4.17.21
+        version: 4.17.21
+      '@types/react':
+        specifier: 19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+
+  packages/SanHangJu/SuiShiZhuang/SheBei:
     dependencies:
       '@reduxjs/toolkit':
         specifier: 2.11.0
@@ -1173,8 +1493,8 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  '@rc-component/qrcode@1.1.0':
-    resolution: {integrity: sha512-ABA80Yer0c6I2+moqNY0kF3Y1NxIT6wDP/EINIqbiRbfZKP1HtHpKMh8WuTXLgVGYsoWG2g9/n0PgM8KdnJb4Q==}
+  '@rc-component/qrcode@1.1.1':
+    resolution: {integrity: sha512-LfLGNymzKdUPjXUbRP+xOhIWY4jQ+YMj5MmWAcgcAq1Ij8XP7tRmAXqyuv96XvLUBE/5cA8hLFl9eO1JQMujrA==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -2071,6 +2391,12 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
+  echarts-for-react@3.0.5:
+    resolution: {integrity: sha512-YpEI5Ty7O/2nvCfQ7ybNa+S90DwE8KYZWacGvJW4luUqywP7qStQ+pxDlYOmr4jGDu10mhEkiAuMKcUlT4W5vg==}
+    peerDependencies:
+      echarts: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+      react: ^15.0.0 || >=16.0.0
+
   echarts@6.0.0:
     resolution: {integrity: sha512-Tte/grDQRiETQP4xz3iZWSvoHrkCQtwqd6hs+mifXcjrCuo2iKWbajFObuLJVBlDIJlOzgQPd1hsaKt/3+OMkQ==}
 
@@ -2427,8 +2753,8 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  immer@11.0.0:
-    resolution: {integrity: sha512-XtRG4SINt4dpqlnJvs70O2j6hH7H0X8fUzFsjMn1rwnETaxwp83HLNimXBjZ78MrKl3/d3/pkzDH0o0Lkxm37Q==}
+  immer@11.0.1:
+    resolution: {integrity: sha512-naDCyggtcBWANtIrjQEajhhBEuL9b0Zg4zmlWK2CzS6xCWSE39/vvf4LqnMjUAWHBhot4m9MHCM/Z+mfWhUkiA==}
 
   immutable@5.1.4:
     resolution: {integrity: sha512-p6u1bG3YSnINT5RQmx/yRZBpenIl30kVxkTLDyHLIMk0gict704Q9n+thfDI7lTRm9vXdDYutVzXhzcThxTnXA==}
@@ -3724,6 +4050,9 @@ packages:
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
+
+  size-sensor@1.0.2:
+    resolution: {integrity: sha512-2NCmWxY7A9pYKGXNBfteo4hy14gWu47rg5692peVMst6lQLPKrVjhY+UTEsPI5ceFRJSl3gVgMYaUi/hKuaiKw==}
 
   slice-ansi@7.1.2:
     resolution: {integrity: sha512-iOBWFgUX7caIZiuutICxVgX1SdxwAVFFKwt1EvMYYec/NWO5meOJ6K5uQxhrYBdQJne4KxiqZc+KptFOWFSI9w==}
@@ -5287,10 +5616,9 @@ snapshots:
       react: 18.1.0
       react-dom: 18.1.0(react@18.1.0)
 
-  '@rc-component/qrcode@1.1.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)':
+  '@rc-component/qrcode@1.1.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)':
     dependencies:
       '@babel/runtime': 7.28.4
-      classnames: 2.5.1
       react: 18.1.0
       react-dom: 18.1.0(react@18.1.0)
 
@@ -5319,7 +5647,7 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.0.0
       '@standard-schema/utils': 0.3.0
-      immer: 11.0.0
+      immer: 11.0.1
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
       reselect: 5.1.1
@@ -5758,7 +6086,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       '@rc-component/color-picker': 2.0.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       '@rc-component/mutate-observer': 1.1.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
-      '@rc-component/qrcode': 1.1.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
+      '@rc-component/qrcode': 1.1.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       '@rc-component/tour': 1.15.1(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       '@rc-component/trigger': 2.3.0(react-dom@18.1.0(react@18.1.0))(react@18.1.0)
       classnames: 2.5.1
@@ -6336,6 +6664,13 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
+  echarts-for-react@3.0.5(echarts@6.0.0)(react@18.1.0):
+    dependencies:
+      echarts: 6.0.0
+      fast-deep-equal: 3.1.3
+      react: 18.1.0
+      size-sensor: 1.0.2
+
   echarts@6.0.0:
     dependencies:
       tslib: 2.3.0
@@ -6708,7 +7043,7 @@ snapshots:
   image-size@0.5.5:
     optional: true
 
-  immer@11.0.0: {}
+  immer@11.0.1: {}
 
   immutable@5.1.4: {}
 
@@ -8019,6 +8354,8 @@ snapshots:
   signal-exit@4.1.0: {}
 
   sisteransi@1.0.5: {}
+
+  size-sensor@1.0.2: {}
 
   slice-ansi@7.1.2:
     dependencies:

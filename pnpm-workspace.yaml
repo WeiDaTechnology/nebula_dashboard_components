@@ -1,2 +1,4 @@
 packages:
   - 'packages/*'
+  # 让多级子包（比如 packages/SanHangJu/SuiShiZhuang/SheBei）也被 pnpm 识别为 workspace 包
+  - 'packages/**'
