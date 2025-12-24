@@ -542,6 +542,9 @@ const Component: React.FC<ComponentProps> = props => {
       const res = BlackHole3D.Probe.getCurCombProbeRet()
       const childNodeId = res.elemId
       const dataSetId = res.dataSetId
+      console.log('dataSetId', dataSetId)
+      console.log('(window as any).suiShiZhuangDataSetId', (window as any).suiShiZhuangDataSetId)
+      if (dataSetId !== (window as any).suiShiZhuangDataSetId) return
       const data: dataItem | null | undefined = await fetchData(childNodeId, dataSetId)
       console.log('data', data)
 

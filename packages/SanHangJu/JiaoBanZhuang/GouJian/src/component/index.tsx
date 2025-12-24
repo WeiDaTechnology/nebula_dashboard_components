@@ -188,8 +188,8 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     skipErrorThrower: true,
   })
   const zhanghao = elementParam?.elementParams
-    ?.find?.((e: any) => e.group === '用户定义属性')
-    ?.data?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
+    ?.flatMap?.((e: any) => e?.data || [])
+    ?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
 
   if (!zhanghao) {
     return null
@@ -480,7 +480,8 @@ const Component: React.FC<ComponentProps> = props => {
       const res = BlackHole3D.Probe.getCurCombProbeRet()
       const childNodeId = res.elemId
       const dataSetId = res.dataSetId
-      if (dataSetId !== '3a1de1fd-6753-5904-22ec-5eba998b1105') return
+      // window.jiaoBanZhuangDatasetId
+      if (dataSetId !== (window as any).jiaoBanZhuangDatasetId) return
       const data: dataItem | null | undefined = await fetchData(childNodeId, dataSetId)
       console.log('data', data)
 

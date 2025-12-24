@@ -138,19 +138,6 @@ module.exports = {
   optimization: {
     minimizer: [
       new CssMinimizerPlugin(),
-      new TerserPlugin({
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-            pure_funcs: ['console.log', 'console.error'],
-          },
-          format: {
-            comments: false,
-          },
-        },
-        extractComments: false,
-      }),
     ],
   },
 
