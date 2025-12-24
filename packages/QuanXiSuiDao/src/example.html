@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, height=device-height, user-scalable=0" />
+        <title>Demo</title>
+        <link rel="stylesheet" href="https://demo.bjblackhole.com/BlackHole3.0/css/style.css" />
+    </head>
+    <body>
+        <div id="canvas-cntrNew">
+            <div class="btnNew">
+                <button id="btn_draw_track_renwu" onclick="drawTrack_renwu()">绘制人物路径</button>
+                <button id="btn_renwu" onclick="renwuAnim()">开启人物动画</button>
+                <button id="btn_draw_track_huoche" onclick="drawTrack_huoche()">绘制货车路径</button>
+                <button id="btn_huoche" onclick="huocheAnim()">开启货车动画</button>
+            </div>
+            <canvas id="canvas" style="width: 100%; height: 100%" oncontextmenu="event.preventDefault()" tabindex="1"></canvas>
+            <div class="custom-loading-container">
+                <div class="loading-box">
+                    <div class="icon-box">
+                        <img src="https://demo.bjblackhole.com/BlackHole3.0/imgs/loading.gif" />
+                    </div>
+                    <div class="common-global-progress-box">
+                        <div class="custom-progress-box">
+                            <div class="progress-bar">
+                                <div class="progress-bar-outer">
+                                    <div class="progress-bar-inner"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="custom-text"></div>
+                    </div>
+                    <div class="process-info-box"></div>
+                </div>
+            </div>
+        </div>
+        <script async type="text/javascript" src="https://demo.bjblackhole.com/BlackHole3.0/sdk/RealBIMWeb.js"></script>
+        <script async type="text/javascript" src="https://demo.bjblackhole.com/BlackHole3.0/sdk/BlackHole3D.js"></script>
+        <script async type="text/javascript" src="https://demo.bjblackhole.com/BlackHole3.0/sdk/RealBIMWeb.preload.js"></script>
+        <script async type="text/javascript" src="https://demo.bjblackhole.com/BlackHole3.0/js/Engine.js"></script>
+
+        <!-- 引擎初始化 -->
+        <script type="text/javascript">
+            function RESystemEngineCreatedCallBack() {
+                var dataSetList = [
+                    {
+                        dataSetId: 'changdi',
+                        resourcesAddress:
+                            'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a162cb19bba1113bef6d7cc3151e24e',
+                    },
+                    {
+                        dataSetId: 'renwu',
+                        // resourcesAddress: 'https://realbim.bjblackhole.cn:8009/default.aspx?dir=url_res02&path=res_renwu',
+                        resourcesAddress: 'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_xiaoren',
+                    },
+                    {
+                        dataSetId: 'huoche',
+                        resourcesAddress:
+                            'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a19bfc351a3b69a8bb7ea6a375ed27a',
+                    },
+                ];
+                BlackHole3D.Model.loadDataSet(dataSetList, true);
+                BlackHole3D.Common.setMaxResMemMB(5500);
+                BlackHole3D.Common.setExpectMaxInstMemMB(4500);
+                BlackHole3D.Common.setExpectMaxInstDrawFaceNum(20000000);
+                BlackHole3D.Common.setPageLoadLev(2);
+            }
+            function REDataSetLoadFinishCallBack() {
+                addEntity();
+                // 设置阴影效果
+                var shadowInfo = BlackHole3D.Common.getShadowInfo();
+                shadowInfo.hiResoDist = 30.0;
+                BlackHole3D.Common.setShadowInfo(shadowInfo);
+                // 初始化小人姿势
+                initRenwuAnim();
+            }
+
+            function addEntity() {
+                BlackHole3D.Entity.enterEditMode();
+                let entityList = [];
+                let typeNames_renwu = BlackHole3D.Entity.getAllTypeNames('renwu');
+                if (typeNames_renwu.length) {
+                    let entity = new BlackHole3D.REEntityInfo();
+                    entity.dataSetId = 'renwu';
+                    entity.entityType = typeNames_renwu[0];
+                    entity.elemId = 1;
+                    entity.scale = [1.0, 1.0, 1.0];
+                    entity.rotate = [0.0, 0.0, 0.0, 1.0];
+                    entity.offset = [268.1516942425886, 412.1152666772725, 2.162647794886439];
+                    entityList.push(entity);
+                }
+
+                let typeNames_huoche = BlackHole3D.Entity.getAllTypeNames('huoche');
+                if (typeNames_huoche.length) {
+                    let entity = new BlackHole3D.REEntityInfo();
+                    entity.dataSetId = 'huoche';
+                    entity.entityType = typeNames_huoche[0];
+                    entity.elemId = 1;
+                    entity.scale = [1.0, 1.0, 1.0];
+                    entity.rotate = [0.0, 0.0, 0.0, 1.0];
+                    entity.offset = [230.0, 480.0, 2.163];
+                    entityList.push(entity);
+                }
+
+                BlackHole3D.Entity.addEntities(entityList); //添加实例对象
+                BlackHole3D.Entity.exitEditMode(); //结束编辑模式
+            }
+
+            var track_renwu = [];
+            var draw_track_renwu = false;
+            function drawTrack_renwu() {
+                if (draw_track_huoche) {
+                    alert('当前已有绘制操作，请结束');
+                    return;
+                }
+                draw_track_renwu = !draw_track_renwu;
+                document.getElementById('btn_draw_track_renwu').innerText = draw_track_renwu ? '结束路径绘制' : '绘制人物路径';
+                if (draw_track_renwu) {
+                    document.addEventListener('RESystemSelElement', RESystemSelElement_renwu);
+                    track_renwu = [];
+                    track_anim_renwu = false;
+                    BlackHole3D.Geometry.delShp('draw_track_renwu');
+                    stopRenwuAnim();
+                } else {
+                    document.addEventListener('RESystemSelElement', RESystemSelElement_renwu);
+                }
+            }
+
+            // 绘制路径
+            function RESystemSelElement_renwu(e) {
+                if (draw_track_huoche) {
+                    return;
+                }
+                let probe = BlackHole3D.Probe.getCurCombProbeRet();
+                BlackHole3D.BIM.delAllSelElems();
+                if (e.detail.button == 0) {
+                    track_renwu.push(probe.elemPos);
+                    // 添加辅助矢量线
+                    var lineShpInfo = new BlackHole3D.RELineShpInfo();
+                    lineShpInfo.shpName = 'draw_track_renwu';
+                    lineShpInfo.potList = track_renwu;
+                    lineShpInfo.fillState = 0;
+                    lineShpInfo.lineClr = new BlackHole3D.REColor(0, 255, 255, 128);
+                    BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+                } else {
+                    if (track_renwu.length < 2) {
+                        track_renwu = [];
+                    }
+                    draw_track_renwu = false;
+                    document.getElementById('btn_draw_track_renwu').innerText = '绘制人物路径';
+                    document.removeEventListener('RESystemSelElement', RESystemSelElement_renwu);
+                }
+            }
+
+            var track_anim_renwu = false;
+            function renwuAnim() {
+                if (draw_track_renwu) {
+                    alert('先结束绘制');
+                    return;
+                }
+                if (!track_renwu.length) {
+                    alert('请先绘制轨迹');
+                    return;
+                }
+                track_anim_renwu = !track_anim_renwu;
+                document.getElementById('btn_renwu').innerText = track_anim_renwu ? '退出人物动画' : '开启人物动画';
+                
+                if (track_anim_renwu) {
+                    renwuTrackAnim();
+                    playRenwuWalk();
+                    setCamBind();
+                } else {
+                    stopRenwuAnim();
+                }
+            }
+
+            function renwuTrackAnim() {
+                let trackInfo = new BlackHole3D.REEntityTrackAnimInfo();
+                trackInfo.dataSetId = 'renwu';
+                trackInfo.elemId = 1;
+                trackInfo.trackPointList = track_renwu.map((item) => {
+                    return { pos: item, selfVect: [0.0, -1.0, 0.0] };
+                });
+                trackInfo.pathColsed = false;
+                trackInfo.speed = 1.0;
+                trackInfo.selfVect = [0.0, -1.0, 0.0];
+
+                BlackHole3D.Entity.setTrackAnim(trackInfo);
+
+                let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo.dataSetId = 'renwu';
+                animPlayInfo.elemId = 1;
+                animPlayInfo.animName = '';
+                animPlayInfo.animLevel = 0;
+                animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+                animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+            }
+
+            function playRenwuWalk() {
+                let typeNames = BlackHole3D.Entity.getAllTypeNames('renwu');
+                let selfAnimNameList = BlackHole3D.Entity.getSelfAnimNameList('renwu', typeNames[0]);
+                let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo.dataSetId = 'renwu';
+                animPlayInfo.elemId = 1;
+                animPlayInfo.animName = 'walk';
+                animPlayInfo.animLevel = 1;
+                animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.REPEAT;
+                animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+            }
+
+            function setCamBind() {
+                let bindInfo = new BlackHole3D.RECamBindEntityBoneInfo();
+                bindInfo.dataSetId = 'renwu';
+                bindInfo.elemId = 1;
+                bindInfo.initPos = [0, 3, 3];
+                bindInfo.lookDir = [0.0, -0.89442719099991586, -0.44721359549995793];
+                bindInfo.transTime = 1.0;
+                BlackHole3D.Camera.setCamBindEntityBone(bindInfo);
+            }
+
+            function initRenwuAnim() {
+                let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo.dataSetId = 'renwu';
+                animPlayInfo.elemId = 1;
+                animPlayInfo.animName = 'stand';
+                animPlayInfo.animLevel = 1;
+                animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+                animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PAUSE;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+            }
+            function stopRenwuAnim() {
+                document.getElementById('btn_renwu').innerText = '开启人物动画';
+                BlackHole3D.Camera.clearCamBindBone();
+                initRenwuAnim();
+
+                let animPlayInfo2 = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo2.dataSetId = 'renwu';
+                animPlayInfo2.elemId = 1;
+                animPlayInfo2.animName = '';
+                animPlayInfo2.animLevel = 0;
+                animPlayInfo2.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+                animPlayInfo2.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PAUSE;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo2);
+            }
+
+            var track_huoche = [];
+            var draw_track_huoche = false;
+            function drawTrack_huoche() {
+                if (draw_track_renwu) {
+                    alert('当前已有绘制操作，请结束');
+                    return;
+                }
+
+                draw_track_huoche = !draw_track_huoche;
+                document.getElementById('btn_draw_track_huoche').innerText = draw_track_huoche ? '结束路径绘制' : '绘制货车路径';
+                if (draw_track_huoche) {
+                    document.addEventListener('RESystemSelElement', RESystemSelElement_huoche);
+                    track_huoche = [];
+                    track_anim_huoche = false;
+                    BlackHole3D.Geometry.delShp('draw_track_huoche');
+                    stopHuocheAnim();
+                } else {
+                    document.addEventListener('RESystemSelElement', RESystemSelElement_huoche);
+                }
+            }
+
+            // 绘制路径
+            function RESystemSelElement_huoche(e) {
+                if (draw_track_renwu) {
+                    return;
+                }
+                let probe = BlackHole3D.Probe.getCurCombProbeRet();
+                BlackHole3D.BIM.delAllSelElems();
+                if (e.detail.button == 0) {
+                    track_huoche.push(probe.elemPos);
+                    // 添加辅助矢量线
+                    var lineShpInfo = new BlackHole3D.RELineShpInfo();
+                    lineShpInfo.shpName = 'draw_track_huoche';
+                    lineShpInfo.potList = track_huoche;
+                    lineShpInfo.fillState = 0;
+                    lineShpInfo.lineClr = new BlackHole3D.REColor(255, 0, 255, 128);
+                    BlackHole3D.Geometry.addPolylineShp(lineShpInfo);
+                } else {
+                    if (track_huoche.length < 2) {
+                        track_huoche = [];
+                    }
+                    draw_track_huoche = false;
+                    document.getElementById('btn_draw_track_huoche').innerText = '绘制货车路径';
+                    document.removeEventListener('RESystemSelElement', RESystemSelElement_huoche);
+                }
+            }
+
+            var track_anim_huoche = false;
+            function huocheAnim() {
+                if (draw_track_huoche) {
+                    alert('先结束绘制');
+                    return;
+                }
+                if (!track_huoche.length) {
+                    alert('请先绘制轨迹');
+                    return;
+                }
+                track_anim_huoche = !track_anim_huoche;
+                document.getElementById('btn_huoche').innerText = track_anim_huoche ? '退出货车动画' : '开启货车动画';
+
+                if (track_anim_huoche) {
+                    huocheTrackAnim();
+                    playHuocheRun();
+                } else {
+                    stopHuocheAnim();
+                }
+            }
+
+            function huocheTrackAnim() {
+                let trackInfo = new BlackHole3D.REEntityTrackAnimInfo();
+                trackInfo.dataSetId = 'huoche';
+                trackInfo.elemId = 1;
+                trackInfo.trackPointList = track_huoche.map((item) => {
+                    return { pos: item, selfVect: [0.0, -1.0, 0.0] };
+                });
+                trackInfo.pathColsed = false;
+                trackInfo.speed = 5.0;
+                trackInfo.selfVect = [0.0, -1.0, 0.0];
+
+                BlackHole3D.Entity.setTrackAnim(trackInfo);
+                console.log("track_huoche: ", track_huoche);
+
+                // 播放路径动画
+                let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo.dataSetId = 'huoche';
+                animPlayInfo.elemId = 1;
+                animPlayInfo.animName = '';
+                animPlayInfo.animLevel = 0;
+                animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+                animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+            }
+
+            function playHuocheRun() {
+                let typeNames = BlackHole3D.Entity.getAllTypeNames('huoche');
+                let selfAnimNameList = BlackHole3D.Entity.getSelfAnimNameList('huoche', typeNames[0]);
+                let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo.dataSetId = 'huoche';
+                animPlayInfo.elemId = 1;
+                animPlayInfo.animName = 'run';
+                animPlayInfo.animLevel = 1;
+                animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.REPEAT;
+                animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PLAY;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+            }
+
+            function stopHuocheAnim() {
+                document.getElementById('btn_huoche').innerText = '开启货车动画';
+
+                let animPlayInfo_luntai = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo_luntai.dataSetId = 'huoche';
+                animPlayInfo_luntai.elemId = 1;
+                animPlayInfo_luntai.animName = 'run';
+                animPlayInfo_luntai.animLevel = 1;
+                animPlayInfo_luntai.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+                animPlayInfo_luntai.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PAUSE;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo_luntai);
+
+                let animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo();
+                animPlayInfo.dataSetId = 'huoche';
+                animPlayInfo.elemId = 1;
+                animPlayInfo.animName = '';
+                animPlayInfo.animLevel = 0;
+                animPlayInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE;
+                animPlayInfo.animPlayState = BlackHole3D.REEntityAnimPlayStateEm.PAUSE;
+                BlackHole3D.Entity.setAnimPlayModeSingle(animPlayInfo);
+            }
+        </script>
+    </body>
+</html>
