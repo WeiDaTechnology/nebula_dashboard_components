@@ -1,0 +1,39 @@
+{
+    "timestamp": 1766125117935,
+    "simuTime": 1000,
+    "startSimuTime": 1766125117691,
+    "batchNum": 10,
+    "count": 1,
+    "objs": [
+        {
+            "id": 200001,
+            "name": "",
+            "typeCode": 1,
+            "roadId": 5,
+            "inLink": true,
+            "laneCount": 2,
+            "laneNumber": 1,
+            "laneTypeName": "机动车道",
+            "angle": 38.26,
+            "speed": 17.94,
+            "Speed": 64.6,
+            "size": [
+                4.73,
+                2.09,
+                2
+            ],
+            "color": "#FFFFFF",
+            "x": -720.5,
+            "y": -513.62,
+            "z": 0.0,
+            "xOrig": 456750.66,
+            "yOrig": 2710545.57,
+            "zOrig": 0.0,
+            "longitude": null,
+            "latitude": null,
+            "eulerX": 0.9031,
+            "eulerY": 0.9031,
+            "eulerZ": 0.9031
+        }
+    ]
+}

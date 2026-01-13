@@ -3,6 +3,7 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const _MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const isRunOnLocal = process.env.RUN_ON_LOCAL === 'true'
 
@@ -43,6 +44,10 @@ module.exports = {
     hot: true,
     client: {
       overlay: false,
+    },
+    static: {
+      directory: path.join(__dirname, 'src/public'),
+      publicPath: '/',
     },
   },
 
@@ -150,6 +155,15 @@ module.exports = {
 
   plugins: [
     new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/public'),
+          to: path.resolve(__dirname, 'dist'),
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
     new HtmlWebpackPlugin({
       template: './config/template.default.ejs',
       filename: 'index.html',

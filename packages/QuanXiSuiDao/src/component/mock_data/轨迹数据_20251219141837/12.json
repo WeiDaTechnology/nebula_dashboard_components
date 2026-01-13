@@ -1,0 +1,69 @@
+{
+    "timestamp": 1766125118108,
+    "simuTime": 1200,
+    "startSimuTime": 1766125117691,
+    "batchNum": 12,
+    "count": 2,
+    "objs": [
+        {
+            "id": 200001,
+            "name": "",
+            "typeCode": 1,
+            "roadId": 5,
+            "inLink": true,
+            "laneCount": 2,
+            "laneNumber": 1,
+            "laneTypeName": "机动车道",
+            "angle": 38.26,
+            "speed": 17.94,
+            "Speed": 64.6,
+            "size": [
+                4.73,
+                2.09,
+                2
+            ],
+            "color": "#FFFFFF",
+            "x": -718.28,
+            "y": -510.8,
+            "z": 0.0,
+            "xOrig": 456752.88,
+            "yOrig": 2710548.39,
+            "zOrig": 0.0,
+            "longitude": null,
+            "latitude": null,
+            "eulerX": 0.9031,
+            "eulerY": 0.9031,
+            "eulerZ": 0.9031
+        },
+        {
+            "id": 200002,
+            "name": "",
+            "typeCode": 2,
+            "roadId": 5,
+            "inLink": true,
+            "laneCount": 2,
+            "laneNumber": 0,
+            "laneTypeName": "机动车道",
+            "angle": 37.55,
+            "speed": 14.11,
+            "Speed": 50.8,
+            "size": [
+                12.1,
+                2.54,
+                2
+            ],
+            "color": "#FFFFFF",
+            "x": -718.64,
+            "y": -517.82,
+            "z": 0.0,
+            "xOrig": 456752.52,
+            "yOrig": 2710541.37,
+            "zOrig": 0.0,
+            "longitude": null,
+            "latitude": null,
+            "eulerX": 0.91537,
+            "eulerY": 0.91537,
+            "eulerZ": 0.91537
+        }
+    ]
+}
