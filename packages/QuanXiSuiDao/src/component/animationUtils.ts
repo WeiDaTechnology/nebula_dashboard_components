@@ -53,7 +53,14 @@ function hideVehicle(vehicleId: number): void {
  */
 function showVehicle(vehicleId: number): void {
   try {
-    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID, [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '1', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '2', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '3', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '4', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '5', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '6', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '7', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '8', [vehicleId])
   } catch (e) {
     console.error(`显示车辆 ${vehicleId} 失败:`, e)
   }
@@ -64,17 +71,19 @@ function showVehicle(vehicleId: number): void {
  */
 export function hideVehicles(vehicleIds: number[]): void {
   if (vehicleIds.length === 0) return
-  try {
-    const elemAttr = new BlackHole3D.REElemAttr()
-    elemAttr.dataSetId = VEHICLE_DATASET_ID
-    elemAttr.elemIdList = vehicleIds
-    elemAttr.elemClr = new BlackHole3D.REColor(255, 255, 255, 0)
-    elemAttr.useNewAlpha = true
-    elemAttr.useNewClr = false
-    BlackHole3D.BIM.setElemAttr(elemAttr)
-    debugLog(`已隐藏 ${vehicleIds.length} 辆车`)
-  } catch (e) {
-    console.error('隐藏车辆失败:', e)
+  for (let i = 1; i < 9; i++) {
+    try {
+      const elemAttr = new BlackHole3D.REElemAttr()
+      elemAttr.dataSetId = VEHICLE_DATASET_ID + i
+      elemAttr.elemIdList = vehicleIds
+      elemAttr.elemClr = new BlackHole3D.REColor(255, 255, 255, 0)
+      elemAttr.useNewAlpha = true
+      elemAttr.useNewClr = false
+      BlackHole3D.BIM.setElemAttr(elemAttr)
+      debugLog(`已隐藏 ${vehicleIds.length} 辆车`)
+    } catch (e) {
+      console.error('隐藏车辆失败:', e)
+    }
   }
 }
 
@@ -83,11 +92,13 @@ export function hideVehicles(vehicleIds: number[]): void {
  */
 export function showVehicles(vehicleIds: number[]): void {
   if (vehicleIds.length === 0) return
-  try {
-    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID, vehicleIds)
-    debugLog(`已显示 ${vehicleIds.length} 辆车`)
-  } catch (e) {
-    console.error('显示车辆失败:', e)
+  for (let i = 1; i < 9; i++) {
+    try {
+      BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + i, vehicleIds)
+      debugLog(`已显示 ${vehicleIds.length} 辆车`)
+    } catch (e) {
+      console.error('显示车辆失败:', e)
+    }
   }
 }
 
@@ -322,7 +333,7 @@ function setupVehicleTrackAnim(
 
   // 设置轨迹动画
   const trackInfo = new BlackHole3D.REEntityTrackAnimInfo()
-  trackInfo.dataSetId = 'huoche'
+  trackInfo.dataSetId = vehicle.dataSetId
   trackInfo.elemId = vehicle.id
   trackInfo.trackPointList = trackPointList
   trackInfo.pathColsed = false
@@ -342,10 +353,11 @@ function setupVehicleTrackAnim(
 function createPathPlayerSet(
   vehicleId: number,
   startTime: number,
-  duration: number
+  duration: number,
+  dataSetId: string
 ): any {
   const playerSetInfo = new BlackHole3D.REPlayerSetInfo()
-  playerSetInfo.dataSetId = 'huoche'
+  playerSetInfo.dataSetId = dataSetId
   playerSetInfo.elemId = vehicleId
   playerSetInfo.animLevel = 0
   playerSetInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.ONCE
@@ -375,10 +387,11 @@ function createPathPlayerSet(
 function createWheelPlayerSet(
   vehicleId: number,
   startTime: number,
-  duration: number
+  duration: number,
+  dataSetId: string
 ): any {
   const playerSetInfo = new BlackHole3D.REPlayerSetInfo()
-  playerSetInfo.dataSetId = 'huoche'
+  playerSetInfo.dataSetId = dataSetId
   playerSetInfo.elemId = vehicleId
   playerSetInfo.animLevel = 1
   playerSetInfo.animPlayMode = BlackHole3D.REEntityAnimPlayModeEm.REPEAT
@@ -405,10 +418,10 @@ function createWheelPlayerSet(
 /**
  * 停止单个车辆的动画（保留用于兼容）
  */
-export function stopVehicleAnimation(vehicleId: number): void {
+export function stopVehicleAnimation(vehicleId: number, dataSetId: string): void {
   // 停止路径动画
   const animPlayInfo = new BlackHole3D.REEntitySingleAnimPlayInfo()
-  animPlayInfo.dataSetId = 'huoche'
+  animPlayInfo.dataSetId = dataSetId
   animPlayInfo.elemId = vehicleId
   animPlayInfo.animName = ''
   animPlayInfo.animLevel = 0
@@ -418,7 +431,7 @@ export function stopVehicleAnimation(vehicleId: number): void {
 
   // 停止车轮动画
   const runAnimInfo = new BlackHole3D.REEntitySingleAnimPlayInfo()
-  runAnimInfo.dataSetId = 'huoche'
+  runAnimInfo.dataSetId = dataSetId
   runAnimInfo.elemId = vehicleId
   runAnimInfo.animName = 'run'
   runAnimInfo.animLevel = 1
@@ -488,7 +501,7 @@ export function stopAllVehicleAnimations(trajectoryData: TrajectoryDataFile): vo
     // 回退到逐个停止
     const vehiclesToStop = filterVehicles(trajectoryData.vehicles)
     vehiclesToStop.forEach((vehicle: VehicleData) => {
-      stopVehicleAnimation(vehicle.id)
+      stopVehicleAnimation(vehicle.id, vehicle.dataSetId)
     })
   }
 
@@ -551,11 +564,11 @@ export function startAllVehicleAnimations(
     debugLog(`车辆 ${vehicle.id}: 启动时间 ${startTime.toFixed(2)}s，持续 ${duration.toFixed(2)}s，结束时间 ${endTime.toFixed(2)}s`)
 
     // 添加路径动画播放器
-    const pathPlayerSet = createPathPlayerSet(vehicle.id, startTime, duration)
+    const pathPlayerSet = createPathPlayerSet(vehicle.id, startTime, duration, vehicle.dataSetId)
     animScriptInfo.playerSetList.push(pathPlayerSet)
 
     // 添加车轮动画播放器
-    const wheelPlayerSet = createWheelPlayerSet(vehicle.id, startTime, duration)
+    const wheelPlayerSet = createWheelPlayerSet(vehicle.id, startTime, duration, vehicle.dataSetId)
     animScriptInfo.playerSetList.push(wheelPlayerSet)
 
     // 设置定时器：在 startTime 时显示车辆

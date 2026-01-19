@@ -426,26 +426,26 @@ const Component: React.FC<ComponentProps> = props => {
     setLoadingStatus('正在添加车辆实体...')
 
     try {
-      BlackHole3D.Entity.enterEditMode()
-
       const entityList: any[] = []
-      const typeNamesHuoche = BlackHole3D.Entity.getAllTypeNames('huoche')
-
-      if (!typeNamesHuoche?.length) {
-        setLoadingStatus('错误: 未找到车辆模型')
-        BlackHole3D.Entity.exitEditMode()
-        return
-      }
-
+      BlackHole3D.Entity.enterEditMode()
       // 根据调试配置过滤车辆
       const vehiclesToAdd = filterVehicles(trajectoryData.vehicles)
 
       // 打印调试车辆的原始轨迹数据
       logDebugVehicleTrajectory(vehiclesToAdd)
-
       vehiclesToAdd.forEach((vehicle: VehicleData) => {
+
+        const num = Math.floor(Math.random() * 6) + 1;
+        const typeNamesHuoche = BlackHole3D.Entity.getAllTypeNames('huoche' + num)
+
+        if (!typeNamesHuoche?.length) {
+          setLoadingStatus('错误: 未找到车辆模型')
+          BlackHole3D.Entity.exitEditMode()
+          return
+        }
+        vehicle.dataSetId = 'huoche' + num
         const entity = new BlackHole3D.REEntityInfo()
-        entity.dataSetId = 'huoche'
+        entity.dataSetId = 'huoche' + num
         entity.entityType = typeNamesHuoche[0]
         entity.elemId = vehicle.id
         // 缩小车辆模型
@@ -461,7 +461,6 @@ const Component: React.FC<ComponentProps> = props => {
         } else {
           entity.offset = [0, 0, 0]
         }
-
         entityList.push(entity)
       })
 
@@ -507,11 +506,32 @@ const Component: React.FC<ComponentProps> = props => {
   // 初始化
   useEffect(() => {
     function handleDataSetLoadFinish() {
-      if (!BlackHole3D.Model.getAllDataSetId().includes('huoche')) {
+      if (!BlackHole3D.Model.getAllDataSetId().includes('huoche1','huoche2','huoche3','huoche4','huoche5','huoche6','huoche7','huoche8')) {
         setLoadingStatus('加载车辆模型...')
         BlackHole3D.Model.loadDataSet([{
-          dataSetId: 'huoche',
+          dataSetId: 'huoche1',
           resourcesAddress: 'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a19bfc351a3b69a8bb7ea6a375ed27a',
+        },{
+          dataSetId: 'huoche2',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d00b2561c89fcb9c7f5531040a'
+        },{
+          dataSetId: 'huoche3',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d007855cdf01e0b60236fb2777'
+        },{
+          dataSetId: 'huoche4444',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
+        },{
+          dataSetId: 'huoche555',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14155d10dcf501e9b7b3fc96cbd601'
+        },{
+          dataSetId: 'huoche4',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14154f0a1f97bd4bc7c27b5ff7a246'
+        },{
+          dataSetId: 'huoche5',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a140fe1fbc5c6b9fef90301e079f99b'
+        },{
+          dataSetId: 'huoche6',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a140fddc50f0ad89760ae102524c42b'
         }], false)
       } else {
         setLoadingStatus('引擎就绪')
