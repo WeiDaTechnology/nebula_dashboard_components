@@ -13,8 +13,10 @@ const fs = require('fs')
 const path = require('path')
 
 // 默认路径
-const DEFAULT_INPUT_DIR = path.join(__dirname, '../mock_data/轨迹数据_20251219141837')
-const DEFAULT_OUTPUT_FILE = path.join(__dirname, '../../public/trajectoryData.json')
+// const DEFAULT_INPUT_DIR = path.join(__dirname, '../mock_data/轨迹数据_20251219141837')
+const DEFAULT_INPUT_DIR = path.join(__dirname, '../mock_data/轨迹数据_20260105')
+// const DEFAULT_OUTPUT_FILE = path.join(__dirname, '../../public/trajectoryData.json')
+const DEFAULT_OUTPUT_FILE = path.join(__dirname, '../../public/trajectoryData_test.json')
 
 // 从命令行参数获取路径
 const inputDir = process.argv[2] || DEFAULT_INPUT_DIR
@@ -58,10 +60,9 @@ function groupByVehicleId(sortedData) {
   const vehicleMap = new Map()
 
   for (const frame of sortedData) {
-    const { timestamp, objs } = frame
-    if (!objs || objs.length === 0) continue
-
-    for (const obj of objs) {
+    const { timestamp, vehiData, pedData } = frame
+    if ((!vehiData || vehiData.length === 0) && (!pedData || pedData.length === 0)) continue
+    for (const obj of pedData) {
       const { id, typeCode, color, size, angle, speed, x, y, z, xOrig, yOrig, zOrig, eulerX, eulerY, eulerZ } = obj
 
       if (!vehicleMap.has(id)) {
@@ -75,6 +76,36 @@ function groupByVehicleId(sortedData) {
       }
 
       vehicleMap.get(id).trajectory.push({
+        type: 'human',
+        t: timestamp,   // 简化字段名减小文件体积
+        xo: xOrig,      // xOrig
+        yo: yOrig,      // yOrig
+        zo: zOrig || 0, // zOrig
+        x,
+        y,
+        z: z || 0,
+        a: angle,       // angle
+        s: speed,       // speed
+        ex: eulerX,     // eulerX
+        ey: eulerY,     // eulerY
+        ez: eulerZ,     // eulerZ
+      })
+    }
+    for (const obj of vehiData) {
+      const { id, typeCode, color, size, angle, speed, x, y, z, xOrig, yOrig, zOrig, eulerX, eulerY, eulerZ } = obj
+
+      if (!vehicleMap.has(id)) {
+        vehicleMap.set(id, {
+          id,
+          typeCode,
+          color,
+          size,
+          trajectory: [],
+        })
+      }
+
+      vehicleMap.get(id).trajectory.push({
+        type: 'car',
         t: timestamp,   // 简化字段名减小文件体积
         xo: xOrig,      // xOrig
         yo: yOrig,      // yOrig
