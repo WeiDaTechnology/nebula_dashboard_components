@@ -5,6 +5,7 @@
 
 /** 轨迹点数据（简化字段名以减小 JSON 体积） */
 export interface TrajectoryPoint {
+  type: string
   /** 时间戳 (timestamp) */
   t: number
   /** 投影坐标 X（米）(xOrig) */
@@ -34,7 +35,8 @@ export interface TrajectoryPoint {
 /** 车辆数据 */
 export interface VehicleData {
   /** 车辆 ID */
-  id: number
+  id: string
+  type: string
   /** 类型代码 (1=小车, 2=卡车等) */
   typeCode: number
   /** 颜色 */

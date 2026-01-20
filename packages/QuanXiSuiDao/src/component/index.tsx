@@ -27,7 +27,8 @@ import {
 declare const BlackHole3D: any
 
 // 轨迹数据 JSON 文件的 URL（可配置）
-const TRAJECTORY_DATA_URL = 'http://127.0.0.1:5010/trajectoryData.json'
+const TRAJECTORY_DATA_URL = 'http://127.0.0.1:5010/trajectoryData_test.json'
+// const TRAJECTORY_DATA_URL = 'http://127.0.0.1:5010/trajectoryData.json'
 
 // 预设的区域包围盒（旋转矩形，用于轨迹映射）
 const PRESET_REGION_POINTS: Point3D[] = [
@@ -111,7 +112,7 @@ const Component: React.FC<ComponentProps> = props => {
 
       const data: TrajectoryDataFile = await response.json()
       setTrajectoryData(data)
-      console.log('轨迹数据加载成功:', data.meta)
+      console.log('轨迹数据加载成功:', data.meta, data)
 
       // 计算轨迹坐标范围（用于日志输出）
       calculateTrajectoryBoundingBox(data)
@@ -435,7 +436,9 @@ const Component: React.FC<ComponentProps> = props => {
       logDebugVehicleTrajectory(vehiclesToAdd)
       vehiclesToAdd.forEach((vehicle: VehicleData) => {
 
-        const num = Math.floor(Math.random() * 6) + 1;
+        const num = vehicle.type === 'car' ? Math.floor(Math.random() * 6) + 1 : 0;
+        // const num = Math.floor(Math.random() * 6) + 1;
+        console.log('--------- vehicle.type', vehicle.type , vehicle.type === 'car', num)
         const typeNamesHuoche = BlackHole3D.Entity.getAllTypeNames('huoche' + num)
 
         if (!typeNamesHuoche?.length) {
@@ -508,7 +511,12 @@ const Component: React.FC<ComponentProps> = props => {
     function handleDataSetLoadFinish() {
       if (!BlackHole3D.Model.getAllDataSetId().includes('huoche1','huoche2','huoche3','huoche4','huoche5','huoche6','huoche7','huoche8')) {
         setLoadingStatus('加载车辆模型...')
-        BlackHole3D.Model.loadDataSet([{
+        BlackHole3D.Model.loadDataSet([
+        {
+          dataSetId: 'huoche0',
+          // resourcesAddress: 'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_xiaoren',
+          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
+        },{
           dataSetId: 'huoche1',
           resourcesAddress: 'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a19bfc351a3b69a8bb7ea6a375ed27a',
         },{
@@ -518,12 +526,12 @@ const Component: React.FC<ComponentProps> = props => {
           dataSetId: 'huoche3',
           resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d007855cdf01e0b60236fb2777'
         },{
-          dataSetId: 'huoche4444',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
-        },{
-          dataSetId: 'huoche555',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14155d10dcf501e9b7b3fc96cbd601'
-        },{
+        //   dataSetId: 'huoche4444',
+        //   resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
+        // },{
+        //   dataSetId: 'huoche555',
+        //   resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14155d10dcf501e9b7b3fc96cbd601'
+        // },{
           dataSetId: 'huoche4',
           resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14154f0a1f97bd4bc7c27b5ff7a246'
         },{

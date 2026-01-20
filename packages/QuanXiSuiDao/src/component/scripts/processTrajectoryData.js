@@ -44,7 +44,6 @@ function readJsonFiles(dir) {
 
   return allData
 }
-
 /**
  * 按时间戳排序
  */
@@ -57,17 +56,18 @@ function sortByTimestamp(data) {
  */
 function groupByVehicleId(sortedData) {
   // vehicleId -> { id, typeCode, color, size, trajectory: [{timestamp, xOrig, yOrig, zOrig, angle, speed, x, y, z}] }
-  const vehicleMap = new Map()
-
+  const vehiMap = new Map()
+  const pedMap = new Map()
   for (const frame of sortedData) {
     const { timestamp, vehiData, pedData } = frame
     if ((!vehiData || vehiData.length === 0) && (!pedData || pedData.length === 0)) continue
     for (const obj of pedData) {
       const { id, typeCode, color, size, angle, speed, x, y, z, xOrig, yOrig, zOrig, eulerX, eulerY, eulerZ } = obj
 
-      if (!vehicleMap.has(id)) {
-        vehicleMap.set(id, {
+      if (!pedMap.has(id)) {
+        pedMap.set(id, {
           id,
+          type: 'human',
           typeCode,
           color,
           size,
@@ -75,12 +75,11 @@ function groupByVehicleId(sortedData) {
         })
       }
 
-      vehicleMap.get(id).trajectory.push({
-        type: 'human',
-        t: timestamp,   // 简化字段名减小文件体积
-        xo: xOrig,      // xOrig
-        yo: yOrig,      // yOrig
-        zo: zOrig || 0, // zOrig
+      pedMap.get(id).trajectory.push({
+        t: Number.parseInt(timestamp),   // 简化字段名减小文件体积
+        xo: x - -457471.158,      // xOrig
+        yo: y - -2711059.187,      // yOrig
+        zo: z || 0, // zOrig
         x,
         y,
         z: z || 0,
@@ -94,9 +93,10 @@ function groupByVehicleId(sortedData) {
     for (const obj of vehiData) {
       const { id, typeCode, color, size, angle, speed, x, y, z, xOrig, yOrig, zOrig, eulerX, eulerY, eulerZ } = obj
 
-      if (!vehicleMap.has(id)) {
-        vehicleMap.set(id, {
+      if (!vehiMap.has(id)) {
+        vehiMap.set(id, {
           id,
+          type: 'car',
           typeCode,
           color,
           size,
@@ -104,12 +104,11 @@ function groupByVehicleId(sortedData) {
         })
       }
 
-      vehicleMap.get(id).trajectory.push({
-        type: 'car',
-        t: timestamp,   // 简化字段名减小文件体积
-        xo: xOrig,      // xOrig
-        yo: yOrig,      // yOrig
-        zo: zOrig || 0, // zOrig
+      vehiMap.get(id).trajectory.push({
+        t: Number.parseInt(timestamp),   // 简化字段名减小文件体积
+        xo: x - -457471.158,      // xOrig
+        yo: y - -2711059.187,      // yOrig
+        zo: z || 0, // zOrig
         x,
         y,
         z: z || 0,
@@ -121,9 +120,8 @@ function groupByVehicleId(sortedData) {
       })
     }
   }
-
   // 转换为数组
-  const vehicles = Array.from(vehicleMap.values())
+  const vehicles = Array.from(vehiMap.values()).concat(Array.from(pedMap.values()))
 
   // 对每个车辆的轨迹按时间排序
   for (const v of vehicles) {

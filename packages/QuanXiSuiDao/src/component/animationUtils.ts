@@ -59,8 +59,9 @@ function showVehicle(vehicleId: number): void {
     BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '4', [vehicleId])
     BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '5', [vehicleId])
     BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '6', [vehicleId])
-    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '7', [vehicleId])
-    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '8', [vehicleId])
+    // BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '7', [vehicleId])
+    // BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '8', [vehicleId])
+    BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + '0', [vehicleId])
   } catch (e) {
     console.error(`显示车辆 ${vehicleId} 失败:`, e)
   }
@@ -71,7 +72,7 @@ function showVehicle(vehicleId: number): void {
  */
 export function hideVehicles(vehicleIds: number[]): void {
   if (vehicleIds.length === 0) return
-  for (let i = 1; i < 9; i++) {
+  for (let i = 0; i < 7; i++) {
     try {
       const elemAttr = new BlackHole3D.REElemAttr()
       elemAttr.dataSetId = VEHICLE_DATASET_ID + i
@@ -92,7 +93,7 @@ export function hideVehicles(vehicleIds: number[]): void {
  */
 export function showVehicles(vehicleIds: number[]): void {
   if (vehicleIds.length === 0) return
-  for (let i = 1; i < 9; i++) {
+  for (let i = 0; i < 7; i++) {
     try {
       BlackHole3D.BIM.resetElemAttr(VEHICLE_DATASET_ID + i, vehicleIds)
       debugLog(`已显示 ${vehicleIds.length} 辆车`)
@@ -162,7 +163,7 @@ export function logDebugVehicleTrajectory(vehicles: VehicleData[]): void {
   debugLog('=== 调试车辆原始轨迹数据 ===')
   vehicles.forEach((vehicle: VehicleData) => {
     debugLog(`车辆 ID: ${vehicle.id}`)
-    debugLog(`类型: ${vehicle.typeCode}, 颜色: ${vehicle.color}`)
+    debugLog(`类型: ${vehicle.typeCode}, 颜色: ${vehicle.color}, ${vehicle.type}`)
     debugLog(`尺寸: [${vehicle.size.join(', ')}]`)
     debugLog(`轨迹点数: ${vehicle.trajectory.length}`)
 
@@ -293,9 +294,9 @@ export function buildTrackPointList(
   // 转换所有点的位置
   const positions = trajectory.map(point => applyTransform(point))
 
-  debugLog('=== 轨迹点列表构建 ===')
-  debugLog(`总点数: ${positions.length}`)
-  debugLog('selfVect: 固定 [0, -1, 0]（让引擎自动调整朝向）')
+  // debugLog('=== 轨迹点列表构建 ===')
+  // debugLog(`总点数: ${positions.length}`)
+  // debugLog('selfVect: 固定 [0, -1, 0]（让引擎自动调整朝向）')
 
   // 所有点使用固定的 selfVect = [0, -1, 0]
   // 这样引擎会自动根据路径调整车头朝向
@@ -305,11 +306,11 @@ export function buildTrackPointList(
   }))
 
   // 打印转换后的前几个点
-  debugLog('转换后前 5 点:')
-  result.slice(0, 5).forEach((pt, i) => {
-    debugLog(`  [${i}] pos: (${pt.pos[0].toFixed(2)}, ${pt.pos[1].toFixed(2)}, ${pt.pos[2].toFixed(2)})`)
-  })
-  debugLog('========================')
+  // debugLog('转换后前 5 点:')
+  // result.slice(0, 5).forEach((pt, i) => {
+  //   debugLog(`  [${i}] pos: (${pt.pos[0].toFixed(2)}, ${pt.pos[1].toFixed(2)}, ${pt.pos[2].toFixed(2)})`)
+  // })
+  // debugLog('========================')
 
   return result
 }
@@ -516,6 +517,7 @@ export function startAllVehicleAnimations(
   trajectoryData: TrajectoryDataFile,
   applyTransform: (point: TrajectoryPoint) => Point3D
 ): number {
+  debugLog('--------------- trajectoryData', trajectoryData)
   const vehiclesToAnimate = filterVehicles(trajectoryData.vehicles)
   const validVehicles = vehiclesToAnimate.filter(v => v.trajectory.length >= 2)
 
@@ -551,7 +553,6 @@ export function startAllVehicleAnimations(
   animScriptInfo.playerSetList = []
 
   let maxEndTime = 0
-
   validVehicles.forEach((vehicle: VehicleData) => {
     // 设置车辆轨迹
     const { duration } = setupVehicleTrackAnim(vehicle, applyTransform, DEFAULT_VEHICLE_SPEED)
@@ -561,7 +562,7 @@ export function startAllVehicleAnimations(
     const startTime = (originalDelayMs / 1000) / DEBUG_TIME_SCALE
     const endTime = startTime + duration
 
-    debugLog(`车辆 ${vehicle.id}: 启动时间 ${startTime.toFixed(2)}s，持续 ${duration.toFixed(2)}s，结束时间 ${endTime.toFixed(2)}s`)
+    debugLog(`${vehicle.type === 'car' ? '车辆' : '行人'} ${vehicle.id}: 启动时间 ${startTime.toFixed(2)}s，持续 ${duration.toFixed(2)}s，结束时间 ${endTime.toFixed(2)}s`)
 
     // 添加路径动画播放器
     const pathPlayerSet = createPathPlayerSet(vehicle.id, startTime, duration, vehicle.dataSetId)
@@ -574,7 +575,7 @@ export function startAllVehicleAnimations(
     // 设置定时器：在 startTime 时显示车辆
     const showTimerId = window.setTimeout(() => {
       showVehicle(vehicle.id)
-      debugLog(`车辆 ${vehicle.id} 已显示（启动动画）`)
+      debugLog(`${vehicle.type === 'car'? '车辆' : '行人'} ${vehicle.id} 已显示（启动动画）`, vehicle.trajectory.slice(0,10))
     }, startTime * 1000)
     visibilityTimers.push(showTimerId)
 
