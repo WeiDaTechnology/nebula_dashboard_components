@@ -553,7 +553,7 @@ export function startAllVehicleAnimations(
   animScriptInfo.playerSetList = []
 
   let maxEndTime = 0
-  validVehicles.filter(it => it.type != 'car').forEach((vehicle: VehicleData) => {
+  validVehicles.forEach((vehicle: VehicleData) => {
     // 设置车辆轨迹
     const { duration } = setupVehicleTrackAnim(vehicle, applyTransform, DEFAULT_VEHICLE_SPEED)
 
