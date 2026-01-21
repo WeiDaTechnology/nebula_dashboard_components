@@ -78,16 +78,16 @@ function groupByVehicleId(sortedData) {
       pedMap.get(id).trajectory.push({
         t: Number.parseInt(timestamp),   // 简化字段名减小文件体积
         xo: x - -457471.158,      // xOrig
-        yo: y - -2711059.187,      // yOrig
-        zo: z || 0, // zOrig
-        x,
-        y,
-        z: z || 0,
-        a: angle,       // angle
-        s: speed,       // speed
-        ex: eulerX,     // eulerX
-        ey: eulerY,     // eulerY
-        ez: eulerZ,     // eulerZ
+        yo: -y - -2711059.187,      // yOrig
+        zo: Number.parseFloat(z) || 0, // zOrig
+        x: Number.parseFloat(x),
+        y: Number.parseFloat(-y),
+        z: Number.parseFloat(z) || 0,
+        a: Number.parseFloat(angle),       // angle
+        s: Number.parseFloat(speed),       // speed
+        ex: Number.parseFloat(eulerX),     // eulerX
+        ey: Number.parseFloat(eulerY),     // eulerY
+        ez: Number.parseFloat(eulerZ),     // eulerZ
       })
     }
     for (const obj of vehiData) {
@@ -107,16 +107,16 @@ function groupByVehicleId(sortedData) {
       vehiMap.get(id).trajectory.push({
         t: Number.parseInt(timestamp),   // 简化字段名减小文件体积
         xo: x - -457471.158,      // xOrig
-        yo: y - -2711059.187,      // yOrig
-        zo: z || 0, // zOrig
-        x,
-        y,
-        z: z || 0,
-        a: angle,       // angle
-        s: speed,       // speed
-        ex: eulerX,     // eulerX
-        ey: eulerY,     // eulerY
-        ez: eulerZ,     // eulerZ
+        yo: -y - -2711059.187,      // yOrig
+        zo: Number.parseFloat(z) || 0, // zOrig
+        x: Number.parseFloat(x),
+        y: Number.parseFloat(-y),
+        z: Number.parseFloat(z) || 0,
+        a: Number.parseFloat(angle),       // angle
+        s: Number.parseFloat(speed),       // speed
+        ex: Number.parseFloat(eulerX),     // eulerX
+        ey: Number.parseFloat(eulerY),     // eulerY
+        ez: Number.parseFloat(eulerZ),     // eulerZ
       })
     }
   }

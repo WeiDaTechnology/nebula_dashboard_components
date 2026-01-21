@@ -514,8 +514,8 @@ const Component: React.FC<ComponentProps> = props => {
         BlackHole3D.Model.loadDataSet([
         {
           dataSetId: 'huoche0',
-          // resourcesAddress: 'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_xiaoren',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
+          resourcesAddress: 'https://demo.bjblackhole.com/default.aspx?dir=url_res02&path=res_xiaoren',
+          // resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
         },{
           dataSetId: 'huoche1',
           resourcesAddress: 'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a19bfc351a3b69a8bb7ea6a375ed27a',
