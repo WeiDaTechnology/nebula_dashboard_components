@@ -22,6 +22,21 @@ const DEFAULT_OUTPUT_FILE = path.join(__dirname, '../../public/trajectoryData_te
 const inputDir = process.argv[2] || DEFAULT_INPUT_DIR
 const outputFile = process.argv[3] || DEFAULT_OUTPUT_FILE
 
+// 全局自增ID管理器
+const GlobalIdManager = {
+  // 从9900000开始
+  currentId: 9900000,
+
+  // 获取下一个自增ID
+  getNextId() {
+    return this.currentId++;
+  },
+
+  // 重置ID（如果需要）
+  reset(startId = 9900000) {
+    this.currentId = startId;
+  }
+};
 /**
  * 读取目录下所有 JSON 文件
  */
@@ -66,7 +81,7 @@ function groupByVehicleId(sortedData) {
 
       if (!pedMap.has(id)) {
         pedMap.set(id, {
-          id,
+          id: typeof id === 'number' ? id : GlobalIdManager.getNextId(),
           type: 'human',
           typeCode,
           color,

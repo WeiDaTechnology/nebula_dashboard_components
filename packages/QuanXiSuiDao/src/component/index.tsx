@@ -438,9 +438,8 @@ const Component: React.FC<ComponentProps> = props => {
 
         const num = vehicle.type === 'car' ? Math.floor(Math.random() * 6) + 1 : 0;
         // const num = Math.floor(Math.random() * 6) + 1;
-        console.log('--------- vehicle.type', vehicle.type , vehicle.type === 'car', num)
         const typeNamesHuoche = BlackHole3D.Entity.getAllTypeNames('huoche' + num)
-
+        console.log('----------------', num, vehicle.type)
         if (!typeNamesHuoche?.length) {
           setLoadingStatus('错误: 未找到车辆模型')
           BlackHole3D.Entity.exitEditMode()

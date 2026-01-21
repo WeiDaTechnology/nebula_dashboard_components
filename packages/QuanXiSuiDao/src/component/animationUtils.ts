@@ -331,15 +331,15 @@ function setupVehicleTrackAnim(
 
   // 计算动画时长（秒）
   const duration = trackLength / speed
-
   // 设置轨迹动画
   const trackInfo = new BlackHole3D.REEntityTrackAnimInfo()
   trackInfo.dataSetId = vehicle.dataSetId
   trackInfo.elemId = vehicle.id
   trackInfo.trackPointList = trackPointList
   trackInfo.pathColsed = false
-  trackInfo.speed = speed
+  trackInfo.speed = speed ?? 1
   trackInfo.selfVect = [0.0, -1.0, 0.0]  // 模型的 Y 负方向是前进方向
+  console.log('------------ setupVehicle', trackInfo.dataSetId, trackInfo.elemId)
 
   BlackHole3D.Entity.setTrackAnim(trackInfo)
 
@@ -553,7 +553,7 @@ export function startAllVehicleAnimations(
   animScriptInfo.playerSetList = []
 
   let maxEndTime = 0
-  validVehicles.forEach((vehicle: VehicleData) => {
+  validVehicles.filter(it => it.type != 'car').forEach((vehicle: VehicleData) => {
     // 设置车辆轨迹
     const { duration } = setupVehicleTrackAnim(vehicle, applyTransform, DEFAULT_VEHICLE_SPEED)
 
