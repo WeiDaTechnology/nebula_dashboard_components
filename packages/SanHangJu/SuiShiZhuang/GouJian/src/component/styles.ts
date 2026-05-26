@@ -75,6 +75,36 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       border-bottom: 1px solid rgba(64, 150, 255, 0.2);
       position: relative;
       min-height: 36px;
+      gap: 12px;
+    `,
+    deviceTabs: css`
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    `,
+    deviceTab: css`
+      background: rgba(15, 25, 40, 0.8);
+      border: 1px solid rgba(64, 150, 255, 0.3);
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 12px;
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+
+      &:hover {
+        border-color: rgba(77, 217, 255, 0.6);
+        color: #fff;
+      }
+    `,
+    deviceTabActive: css`
+      background: rgba(77, 217, 255, 0.18);
+      border-color: rgba(77, 217, 255, 0.8);
+      color: #4dd9ff;
+      box-shadow: 0 0 8px rgba(77, 217, 255, 0.25);
     `,
     statusIndicator: css`
       display: flex;

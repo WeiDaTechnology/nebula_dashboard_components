@@ -135,6 +135,51 @@ type ChartDataItem = {
   数据来源表: string
   平均深度: number
 }
+
+/** 设备编号 -> 桩号详情数据集 ID */
+const DEVICE_DATASET_MAP: Record<number, string> = {
+  1: 'f6fba8efa2514d6d8515574aa941b607',
+  2: 'f7d110b01e114b76adbee5b1a3b3e9e4',
+  3: 'a32e9cd0ab3244eb94fa61e6ce5fa623',
+  4: 'fe8d03a9145e4df69a1f402f1a5cecb9',
+}
+
+interface DeviceOption {
+  tableName: string
+  deviceNum: number
+  label: string
+}
+
+function getDeviceNumberFromTable(tableName: string): number {
+  const suffix = tableName.split('_').pop() ?? ''
+  return Number.parseInt(suffix, 10) || 0
+}
+
+function getDeviceLabel(deviceNum: number): string {
+  return `建基${String(deviceNum).padStart(2, '0')}`
+}
+
+function groupChartDataByDevice(chartData: ChartDataItem[] = []): Record<string, ChartDataItem[]> {
+  return chartData.reduce<Record<string, ChartDataItem[]>>((groups, item) => {
+    const tableName = item['数据来源表']
+    if (!tableName) return groups
+    if (!groups[tableName]) {
+      groups[tableName] = []
+    }
+    groups[tableName].push(item)
+    return groups
+  }, {})
+}
+
+function getDeviceOptions(groups: Record<string, ChartDataItem[]>): DeviceOption[] {
+  return Object.keys(groups)
+    .map(tableName => ({
+      tableName,
+      deviceNum: getDeviceNumberFromTable(tableName),
+      label: getDeviceLabel(getDeviceNumberFromTable(tableName)),
+    }))
+    .sort((a, b) => a.deviceNum - b.deviceNum)
+}
 // 将API返回的图表数据转换为ECharts需要的格式
 function convertChartData(chartDataItems: ChartDataItem[] = []): ChartsData {
   // 如果没有数据，返回空数组
@@ -230,7 +275,33 @@ function generateMockChartsData(): ChartsData {
     skipErrorThrower: true
   })
      */
-async function fetchData(childNodeId: string, dataSetId: string): Promise<dataItem | null> {
+async function fetchStationDataByDevice(zhuanghao: string, deviceNum: number): Promise<dataItem | null> {
+  const dataSetUuid = DEVICE_DATASET_MAP[deviceNum]
+  if (!dataSetUuid) {
+    return null
+  }
+
+  const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+    data: {
+      dataSetUuid,
+      params: {
+        zhaunghao: zhuanghao,
+      },
+    },
+  })
+
+  return response.data?.[0] ?? null
+}
+
+interface FetchDataResult {
+  zhuanghao: string
+  stationInfo: dataItem | null
+  chartDataGroups: Record<string, ChartDataItem[]>
+  deviceOptions: DeviceOption[]
+  selectedDeviceTable: string
+}
+
+async function fetchData(childNodeId: string, dataSetId: string): Promise<FetchDataResult | null> {
   const elementParam: any = await window.core.request('bjgraphicplatform/project/element/getElementParam', {
     data: {
       dataSetId,
@@ -243,62 +314,11 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     ?.find?.((e: any) => e.group === '用户定义属性')
     ?.data?.find?.((e: any) => e?.paramName === '桩号')?.paramValue
 
-  // zhuanghao = 'S11-1-12'
   if (!zhuanghao) {
     return null
   }
-  let shebei = ''
 
-  const a = [
-    'fe8d03a9145e4df69a1f402f1a5cecb9', // 4 "029e5b0183f8472fb20e7689fe245422"
-    'a32e9cd0ab3244eb94fa61e6ce5fa623', // 3 "ff40511b887f4f62859f229e43348bfb"
-    'f6fba8efa2514d6d8515574aa941b607', // 1 "e47e9185b3d54ad7b7727344bbb0bdf9"
-    'f7d110b01e114b76adbee5b1a3b3e9e4', // 2 "0a3e3ace0ef84630b479fb14e366ef7e"
-  ].map(datasetId => async () => {
-    const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
-      data: {
-        dataSetUuid: datasetId,
-        params: {
-          zhaunghao: zhuanghao,
-        },
-      },
-    })
-    if (response.data?.[0]) {
-      shebei = datasetId
-    }
-    return response.data?.[0]
-  })
-  const b = await Promise.all(a.map(e => e()))
-  const foundData = b.find(e => !!e)
-
-  if (!foundData) {
-    return null
-  }
-
-  // 获取图表数据
-  /**
-   * [
-    {
-        "桩号": "S11-9-68",
-        "平均频率": 44,
-        "平均电流": 350.4,
-        "时间段": "11-13 15:00",
-        "平均填料量": 30,
-        "数据来源表": "fdssz_sg01_002",
-        "平均深度": -4.75
-    },
-    {
-        "桩号": "S11-9-68",
-        "平均频率": 44,
-        "平均电流": 326.33,
-        "时间段": "11-13 16:00",
-        "平均填料量": 30,
-        "数据来源表": "fdssz_sg01_002",
-        "平均深度": 0.28
-    }
-  ]
-   */
-  const x: { data: ChartDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+  const chartResponse: { data: ChartDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
     data: {
       dataSetUuid: '3d9098f1c0694abaa402514ce53dbd56',
       params: {
@@ -307,9 +327,22 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     },
   })
 
+  const chartDataGroups = groupChartDataByDevice(chartResponse.data ?? [])
+  const deviceOptions = getDeviceOptions(chartDataGroups)
+
+  if (deviceOptions.length === 0) {
+    return null
+  }
+
+  const defaultDevice = deviceOptions[0]
+  const stationInfo = await fetchStationDataByDevice(zhuanghao, defaultDevice.deviceNum)
+
   return {
-    ...foundData,
-    chartData: x.data,
+    zhuanghao,
+    stationInfo,
+    chartDataGroups,
+    deviceOptions,
+    selectedDeviceTable: defaultDevice.tableName,
   }
 }
 
@@ -320,6 +353,10 @@ const Component: React.FC<ComponentProps> = props => {
   console.log('Component', props)
   const [internalVisible, setInternalVisible] = useState(false)
   const [stationInfo, setStationInfo] = useState<dataItem | null>(null)
+  const [zhuanghao, setZhuanghao] = useState('')
+  const [deviceOptions, setDeviceOptions] = useState<DeviceOption[]>([])
+  const [selectedDeviceTable, setSelectedDeviceTable] = useState('')
+  const [chartDataGroups, setChartDataGroups] = useState<Record<string, ChartDataItem[]>>({})
   const [chartsData, setChartsData] = useState<ChartsData>({
     depth: [],
     volume: [],
@@ -333,8 +370,27 @@ const Component: React.FC<ComponentProps> = props => {
       setInternalVisible(false)
     }
     setStationInfo(null)
+    setZhuanghao('')
+    setDeviceOptions([])
+    setSelectedDeviceTable('')
+    setChartDataGroups({})
     onClose?.()
   }
+
+  const handleDeviceChange = useCallback(
+    async (device: DeviceOption) => {
+      if (device.tableName === selectedDeviceTable || !zhuanghao) {
+        return
+      }
+
+      setSelectedDeviceTable(device.tableName)
+      setChartsData(convertChartData(chartDataGroups[device.tableName]))
+
+      const nextStationInfo = await fetchStationDataByDevice(zhuanghao, device.deviceNum)
+      setStationInfo(nextStationInfo)
+    },
+    [chartDataGroups, selectedDeviceTable, zhuanghao],
+  )
 
   const formatValue = (value: string | number | undefined, unit?: string): string => {
     if (value === undefined || value === null || value === '') {
@@ -545,15 +601,16 @@ const Component: React.FC<ComponentProps> = props => {
       console.log('dataSetId', dataSetId)
       console.log('(window as any).suiShiZhuangDataSetId', (window as any).suiShiZhuangDataSetId)
       if (dataSetId !== (window as any).suiShiZhuangDataSetId) return
-      const data: dataItem | null | undefined = await fetchData(childNodeId, dataSetId)
+      const data = await fetchData(childNodeId, dataSetId)
       console.log('data', data)
 
-      // 如果获取到数据，设置到状态并显示弹窗
       if (data) {
-        setStationInfo(data)
-        // 使用真实图表数据，如果没有则使用模拟数据作为备用
-        const realCharts = data.chartData ? convertChartData(data.chartData) : generateMockChartsData()
-        setChartsData(realCharts)
+        setZhuanghao(data.zhuanghao)
+        setDeviceOptions(data.deviceOptions)
+        setSelectedDeviceTable(data.selectedDeviceTable)
+        setChartDataGroups(data.chartDataGroups)
+        setStationInfo(data.stationInfo)
+        setChartsData(convertChartData(data.chartDataGroups[data.selectedDeviceTable]))
         setInternalVisible(true)
       }
     }
@@ -589,7 +646,22 @@ const Component: React.FC<ComponentProps> = props => {
           <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
             {/* 标题栏 */}
             <div className={styles.header}>
-              <h2 className={styles.title}>{stationInfo?.['桩号'] || '/'}</h2>
+              {deviceOptions.length > 1 && (
+                <div className={styles.deviceTabs}>
+                  {deviceOptions.map(device => (
+                    <button
+                      aria-label={`切换到${device.label}`}
+                      className={`${styles.deviceTab} ${selectedDeviceTable === device.tableName ? styles.deviceTabActive : ''}`}
+                      key={device.tableName}
+                      onClick={() => handleDeviceChange(device)}
+                      type="button"
+                    >
+                      {device.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <h2 className={styles.title}>{stationInfo?.['桩号'] || zhuanghao || '/'}</h2>
               <div className={styles.rightActions}>
                 <span className={styles.trophyIcon}>🏆</span>
                 <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
