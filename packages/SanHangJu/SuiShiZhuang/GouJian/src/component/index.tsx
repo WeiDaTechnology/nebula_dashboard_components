@@ -1,6 +1,6 @@
 import ReactECharts from 'echarts-for-react'
 import type * as React from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
 
@@ -362,13 +362,20 @@ const Component: React.FC<ComponentProps> = props => {
     volume: [],
     current: [],
   })
+  const [loading, setLoading] = useState(false)
+  const [deviceLoading, setDeviceLoading] = useState(false)
+  const requestIdRef = useRef(0)
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
+  const contentLoading = loading || deviceLoading
 
   const handleClose = () => {
     if (controlledVisible === undefined) {
       setInternalVisible(false)
     }
+    requestIdRef.current += 1
+    setLoading(false)
+    setDeviceLoading(false)
     setStationInfo(null)
     setZhuanghao('')
     setDeviceOptions([])
@@ -379,17 +386,22 @@ const Component: React.FC<ComponentProps> = props => {
 
   const handleDeviceChange = useCallback(
     async (device: DeviceOption) => {
-      if (device.tableName === selectedDeviceTable || !zhuanghao) {
+      if (device.tableName === selectedDeviceTable || !zhuanghao || deviceLoading) {
         return
       }
 
       setSelectedDeviceTable(device.tableName)
       setChartsData(convertChartData(chartDataGroups[device.tableName]))
+      setDeviceLoading(true)
 
-      const nextStationInfo = await fetchStationDataByDevice(zhuanghao, device.deviceNum)
-      setStationInfo(nextStationInfo)
+      try {
+        const nextStationInfo = await fetchStationDataByDevice(zhuanghao, device.deviceNum)
+        setStationInfo(nextStationInfo)
+      } finally {
+        setDeviceLoading(false)
+      }
     },
-    [chartDataGroups, selectedDeviceTable, zhuanghao],
+    [chartDataGroups, deviceLoading, selectedDeviceTable, zhuanghao],
   )
 
   const formatValue = (value: string | number | undefined, unit?: string): string => {
@@ -601,17 +613,46 @@ const Component: React.FC<ComponentProps> = props => {
       console.log('dataSetId', dataSetId)
       console.log('(window as any).suiShiZhuangDataSetId', (window as any).suiShiZhuangDataSetId)
       if (dataSetId !== (window as any).suiShiZhuangDataSetId) return
-      const data = await fetchData(childNodeId, dataSetId)
-      console.log('data', data)
 
-      if (data) {
-        setZhuanghao(data.zhuanghao)
-        setDeviceOptions(data.deviceOptions)
-        setSelectedDeviceTable(data.selectedDeviceTable)
-        setChartDataGroups(data.chartDataGroups)
-        setStationInfo(data.stationInfo)
-        setChartsData(convertChartData(data.chartDataGroups[data.selectedDeviceTable]))
-        setInternalVisible(true)
+      const requestId = ++requestIdRef.current
+
+      setInternalVisible(true)
+      setLoading(true)
+      setDeviceLoading(false)
+      setStationInfo(null)
+      setZhuanghao('')
+      setDeviceOptions([])
+      setSelectedDeviceTable('')
+      setChartDataGroups({})
+      setChartsData({ depth: [], volume: [], current: [] })
+
+      try {
+        const data = await fetchData(childNodeId, dataSetId)
+        console.log('data', data)
+
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        if (data) {
+          setZhuanghao(data.zhuanghao)
+          setDeviceOptions(data.deviceOptions)
+          setSelectedDeviceTable(data.selectedDeviceTable)
+          setChartDataGroups(data.chartDataGroups)
+          setStationInfo(data.stationInfo)
+          setChartsData(convertChartData(data.chartDataGroups[data.selectedDeviceTable]))
+        } else {
+          setInternalVisible(false)
+        }
+      } catch (error) {
+        console.error('fetchData failed', error)
+        if (requestId === requestIdRef.current) {
+          setInternalVisible(false)
+        }
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false)
+        }
       }
     }
 
@@ -661,7 +702,7 @@ const Component: React.FC<ComponentProps> = props => {
                   ))}
                 </div>
               )}
-              <h2 className={styles.title}>{stationInfo?.['桩号'] || zhuanghao || '/'}</h2>
+              <h2 className={styles.title}>{loading ? '加载中...' : stationInfo?.['桩号'] || zhuanghao || '/'}</h2>
               <div className={styles.rightActions}>
                 <span className={styles.trophyIcon}>🏆</span>
                 <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
@@ -672,83 +713,90 @@ const Component: React.FC<ComponentProps> = props => {
 
             {/* 内容区域 */}
             <div className={styles.content}>
-              <div className={styles.mainLayout}>
-                {/* 左侧数据列表 */}
-                <div className={styles.leftPanel}>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>桩号</span>
-                    <span className={styles.value}>{stationInfo?.['桩号'] || '/'}</span>
+              {contentLoading ? (
+                <div className={styles.loadingWrapper}>
+                  <div className={styles.loadingSpinner} />
+                  <span className={styles.loadingText}>{loading ? '数据加载中...' : '切换设备中...'}</span>
+                </div>
+              ) : (
+                <div className={styles.mainLayout}>
+                  {/* 左侧数据列表 */}
+                  <div className={styles.leftPanel}>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>桩号</span>
+                      <span className={styles.value}>{stationInfo?.['桩号'] || '/'}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>成孔起止时间（时间区间）</span>
+                      <span className={styles.value}>{stationInfo?.['成孔起止时间'] || '/'}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>设计桩顶</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['设计桩顶'], 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>设计桩底</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['设计桩底'], 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>实际桩顶</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['实际桩顶'], 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>实际桩底</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['实际桩底'], 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>设计坐标X</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['设计坐标X'])}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>设计坐标Y</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['设计坐标Y'])}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>成桩深度</span>
+                      <span className={styles.value}>
+                        {formatValue(stationInfo?.['成桩深度'] || stationInfo?.['real_height'], 'm')}
+                      </span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>累计加料体积</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.['累计加料体积'], 'm³')}</span>
+                    </div>
                   </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>成孔起止时间（时间区间）</span>
-                    <span className={styles.value}>{stationInfo?.['成孔起止时间'] || '/'}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>设计桩顶</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['设计桩顶'], 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>设计桩底</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['设计桩底'], 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>实际桩顶</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['实际桩顶'], 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>实际桩底</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['实际桩底'], 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>设计坐标X</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['设计坐标X'])}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>设计坐标Y</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['设计坐标Y'])}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>成桩深度</span>
-                    <span className={styles.value}>
-                      {formatValue(stationInfo?.['成桩深度'] || stationInfo?.['real_height'], 'm')}
-                    </span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>累计加料体积</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.['累计加料体积'], 'm³')}</span>
+
+                  {/* 右侧图表区域 */}
+                  <div className={styles.rightPanel}>
+                    {/* 深度图表 */}
+                    <div className={styles.chartContainer}>
+                      <ReactECharts
+                        option={depthChartOption}
+                        opts={{ renderer: 'canvas' }}
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
+
+                    {/* 填料量图表 */}
+                    <div className={styles.chartContainer}>
+                      <ReactECharts
+                        option={volumeChartOption}
+                        opts={{ renderer: 'canvas' }}
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
+
+                    {/* 电流量图表 */}
+                    <div className={styles.chartContainer}>
+                      <ReactECharts
+                        option={currentChartOption}
+                        opts={{ renderer: 'canvas' }}
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {/* 右侧图表区域 */}
-                <div className={styles.rightPanel}>
-                  {/* 深度图表 */}
-                  <div className={styles.chartContainer}>
-                    <ReactECharts
-                      option={depthChartOption}
-                      opts={{ renderer: 'canvas' }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
-                  </div>
-
-                  {/* 填料量图表 */}
-                  <div className={styles.chartContainer}>
-                    <ReactECharts
-                      option={volumeChartOption}
-                      opts={{ renderer: 'canvas' }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
-                  </div>
-
-                  {/* 电流量图表 */}
-                  <div className={styles.chartContainer}>
-                    <ReactECharts
-                      option={currentChartOption}
-                      opts={{ renderer: 'canvas' }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

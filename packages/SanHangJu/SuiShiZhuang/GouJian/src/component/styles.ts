@@ -36,6 +36,12 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
           transform: scale(1.1);
         }
       }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     `,
     modalContainer: css`
       position: relative;
@@ -181,6 +187,27 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       flex: 1;
       overflow-y: auto;
       user-select: none;
+    `,
+    loadingWrapper: css`
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      height: 480px;
+    `,
+    loadingSpinner: css`
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(77, 217, 255, 0.15);
+      border-top-color: #4dd9ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    `,
+    loadingText: css`
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+      letter-spacing: 0.5px;
     `,
     mainLayout: css`
       display: flex;
