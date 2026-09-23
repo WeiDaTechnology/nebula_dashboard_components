@@ -42,7 +42,7 @@ export const DEFAULT_TRANSFORM_PARAMS: TransformParams = {
   offsetZ: 0,
   trajCenterX: 0,
   trajCenterY: 0,
-  configured: false
+  configured: false,
 }
 
 // 固定 Z 轴高度
@@ -61,11 +61,7 @@ export const TRAJECTORY_MAIN_ANGLE = Math.PI / 4 // 45 度
  * 点 A、B 确定一条边，点 C 确定另一条边的方向和长度
  * 第 4 个点 D 自动计算得出
  */
-export function calculateRectangleFrom3Points(
-  pointA: Point3D,
-  pointB: Point3D,
-  pointC: Point3D
-): Point3D[] {
+export function calculateRectangleFrom3Points(pointA: Point3D, pointB: Point3D, pointC: Point3D): Point3D[] {
   // 向量 AB
   const abX = pointB[0] - pointA[0]
   const abY = pointB[1] - pointA[1]
@@ -99,10 +95,10 @@ export function calculateRectangleFrom3Points(
   const dY = pointA[1] + height * perpUnitY
 
   return [
-    [pointA[0], pointA[1], FIXED_Z],      // A
-    [pointB[0], pointB[1], FIXED_Z],      // B
-    [cPrimeX, cPrimeY, FIXED_Z],          // C'
-    [dX, dY, FIXED_Z]                     // D
+    [pointA[0], pointA[1], FIXED_Z], // A
+    [pointB[0], pointB[1], FIXED_Z], // B
+    [cPrimeX, cPrimeY, FIXED_Z], // C'
+    [dX, dY, FIXED_Z], // D
   ]
 }
 
@@ -151,7 +147,8 @@ export function findPolygonMainDirection(points: Point3D[]): number {
 export function calculatePolygonCenter(points: Point3D[]): Point2D {
   if (points.length === 0) return [0, 0]
 
-  let sumX = 0, sumY = 0
+  let sumX = 0,
+    sumY = 0
   points.forEach(p => {
     sumX += p[0]
     sumY += p[1]
@@ -168,18 +165,17 @@ export function rotatePoint(x: number, y: number, cx: number, cy: number, angle:
   const sin = Math.sin(angle)
   const dx = x - cx
   const dy = y - cy
-  return [
-    cx + dx * cos - dy * sin,
-    cy + dx * sin + dy * cos
-  ]
+  return [cx + dx * cos - dy * sin, cy + dx * sin + dy * cos]
 }
 
 /**
  * 计算旋转后的包围盒
  */
 export function calculateRotatedBoundingBox(points: Point3D[], angle: number, center: Point2D): BoundingBox2D {
-  let minX = Infinity, maxX = -Infinity
-  let minY = Infinity, maxY = -Infinity
+  let minX = Number.POSITIVE_INFINITY,
+    maxX = Number.NEGATIVE_INFINITY
+  let minY = Number.POSITIVE_INFINITY,
+    maxY = Number.NEGATIVE_INFINITY
 
   points.forEach(p => {
     const [rx, ry] = rotatePoint(p[0], p[1], center[0], center[1], angle)
@@ -196,16 +192,25 @@ export function calculateRotatedBoundingBox(points: Point3D[], angle: number, ce
  * 计算轨迹 OBB 的尺寸（长和宽）
  * 直接遍历所有轨迹点，基于轨迹主方向（45度）计算真正的 OBB
  */
-export function calculateTrajectoryOBBSizeFromData(data: TrajectoryDataFile): { length: number, width: number, centerX: number, centerY: number } {
+export function calculateTrajectoryOBBSizeFromData(data: TrajectoryDataFile): {
+  length: number
+  width: number
+  centerX: number
+  centerY: number
+} {
   // 轨迹主方向角度（45度）
   const angle = TRAJECTORY_MAIN_ANGLE
   const cos = Math.cos(-angle) // 反向旋转以对齐坐标轴
   const sin = Math.sin(-angle)
 
   // 遍历所有轨迹点，计算旋转后的范围
-  let minU = Infinity, maxU = -Infinity
-  let minV = Infinity, maxV = -Infinity
-  let sumX = 0, sumY = 0, count = 0
+  let minU = Number.POSITIVE_INFINITY,
+    maxU = Number.NEGATIVE_INFINITY
+  let minV = Number.POSITIVE_INFINITY,
+    maxV = Number.NEGATIVE_INFINITY
+  let sumX = 0,
+    sumY = 0,
+    count = 0
 
   data.vehicles.forEach(vehicle => {
     vehicle.trajectory.forEach(point => {
@@ -234,9 +239,9 @@ export function calculateTrajectoryOBBSizeFromData(data: TrajectoryDataFile): { 
 
   return {
     length: maxU - minU, // 主方向长度
-    width: maxV - minV,  // 垂直方向宽度
+    width: maxV - minV, // 垂直方向宽度
     centerX,
-    centerY
+    centerY,
   }
 }
 
@@ -244,10 +249,7 @@ export function calculateTrajectoryOBBSizeFromData(data: TrajectoryDataFile): { 
  * 计算最优转换参数
  * 将轨迹数据的 OBB 旋转、缩放后放入用户区域的旋转矩形
  */
-export function calculateOptimalTransform(
-  userPoints: Point3D[],
-  trajectoryData: TrajectoryDataFile
-): TransformParams {
+export function calculateOptimalTransform(userPoints: Point3D[], trajectoryData: TrajectoryDataFile): TransformParams {
   // 1. 找到用户多边形的主方向（最长边的方向）
   const userMainAngle = findPolygonMainDirection(userPoints)
 
@@ -264,13 +266,13 @@ export function calculateOptimalTransform(
 
   // 将用户多边形按主方向旋转，得到"对齐后"的包围盒
   const alignedUserBox = calculateRotatedBoundingBox(userPoints, -userMainAngle, userCenter)
-  const userLength = alignedUserBox.maxX - alignedUserBox.minX  // 主方向长度
-  const userWidth = alignedUserBox.maxY - alignedUserBox.minY   // 垂直方向宽度
+  const userLength = alignedUserBox.maxX - alignedUserBox.minX // 主方向长度
+  const userWidth = alignedUserBox.maxY - alignedUserBox.minY // 垂直方向宽度
 
   // 5. 计算缩放比例（基于 OBB 尺寸，尽量撑满）
   const scaleLength = userLength / trajOBB.length
   const scaleWidth = userWidth / trajOBB.width
-  const scale = Math.min(scaleLength, scaleWidth) * 0.98  // 留 2% 边距
+  const scale = Math.min(scaleLength, scaleWidth) * 0.98 // 留 2% 边距
 
   console.log('=== OBB 尺寸对比 ===')
   console.log('轨迹 OBB: 长度=', trajOBB.length.toFixed(2), '宽度=', trajOBB.width.toFixed(2))
@@ -285,7 +287,7 @@ export function calculateOptimalTransform(
 
   // 7. Z 轴高度取用户区域点的平均 Z
   let sumZ = 0
-  userPoints.forEach(p => sumZ += p[2])
+  userPoints.forEach(p => (sumZ += p[2]))
   const offsetZ = sumZ / userPoints.length
 
   return {
@@ -296,7 +298,7 @@ export function calculateOptimalTransform(
     offsetZ,
     trajCenterX,
     trajCenterY,
-    configured: true
+    configured: true,
   }
 }
 
@@ -328,8 +330,10 @@ export function calculateTrajectoryOBB(data: TrajectoryDataFile): Point3D[] {
   const sin = Math.sin(-angle)
 
   // 将所有点旋转到对齐坐标轴的位置，计算 AABB
-  let minU = Infinity, maxU = -Infinity
-  let minV = Infinity, maxV = -Infinity
+  let minU = Number.POSITIVE_INFINITY,
+    maxU = Number.NEGATIVE_INFINITY
+  let minV = Number.POSITIVE_INFINITY,
+    maxV = Number.NEGATIVE_INFINITY
 
   allPoints.forEach(([x, y]) => {
     // 旋转点
@@ -346,7 +350,7 @@ export function calculateTrajectoryOBB(data: TrajectoryDataFile): Point3D[] {
     [minU, minV], // 左下
     [maxU, minV], // 右下
     [maxU, maxV], // 右上
-    [minU, maxV]  // 左上
+    [minU, maxV], // 左上
   ]
 
   // 将角点旋转回原始坐标系
@@ -374,8 +378,10 @@ export function angleToDirection(angleDeg: number, extraRotation: number): Point
  * 计算轨迹数据的坐标范围
  */
 export function calculateTrajectoryBoundingBox(data: TrajectoryDataFile): BoundingBox2D {
-  let minX = Infinity, maxX = -Infinity
-  let minY = Infinity, maxY = -Infinity
+  let minX = Number.POSITIVE_INFINITY,
+    maxX = Number.NEGATIVE_INFINITY
+  let minY = Number.POSITIVE_INFINITY,
+    maxY = Number.NEGATIVE_INFINITY
 
   data.vehicles.forEach(vehicle => {
     vehicle.trajectory.forEach(point => {
@@ -425,4 +431,3 @@ export function applyTransform(point: TrajectoryPoint, params: TransformParams):
 
   return [x, y, z]
 }
-

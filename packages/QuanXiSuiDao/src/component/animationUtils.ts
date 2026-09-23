@@ -156,7 +156,7 @@ export function logDebugVehicleTrajectory(vehicles: VehicleData[]): void {
   const formatTrajectoryPoint = (point: TrajectoryPoint) => ({
     ...point,
     time: new Date(point.t).toLocaleString('zh-CN'),
-    t: point.t
+    t: point.t,
   })
 
   debugLog('=== 调试车辆原始轨迹数据 ===')
@@ -238,7 +238,7 @@ function directionToQuaternion(dir: Point3D): [number, number, number, number] {
  */
 export function getVehicleInitialRotation(
   trajectory: TrajectoryPoint[],
-  applyTransform: (point: TrajectoryPoint) => Point3D
+  applyTransform: (point: TrajectoryPoint) => Point3D,
 ): [number, number, number, number] {
   if (trajectory.length === 0) {
     return [0, 0, 0, 1]
@@ -288,7 +288,7 @@ function calculateTrajectoryLength(positions: Point3D[]): number {
  */
 export function buildTrackPointList(
   trajectory: TrajectoryPoint[],
-  applyTransform: (point: TrajectoryPoint) => Point3D
+  applyTransform: (point: TrajectoryPoint) => Point3D,
 ): Array<{ pos: Point3D; selfVect: Point3D }> {
   // 转换所有点的位置
   const positions = trajectory.map(point => applyTransform(point))
@@ -301,7 +301,7 @@ export function buildTrackPointList(
   // 这样引擎会自动根据路径调整车头朝向
   const result = positions.map(pos => ({
     pos,
-    selfVect: [0.0, -1.0, 0.0] as Point3D
+    selfVect: [0.0, -1.0, 0.0] as Point3D,
   }))
 
   // 打印转换后的前几个点
@@ -320,7 +320,7 @@ export function buildTrackPointList(
 function setupVehicleTrackAnim(
   vehicle: VehicleData,
   applyTransform: (point: TrajectoryPoint) => Point3D,
-  speed: number
+  speed: number,
 ): { trackLength: number; duration: number } {
   const trackPointList = buildTrackPointList(vehicle.trajectory, applyTransform)
 
@@ -338,7 +338,7 @@ function setupVehicleTrackAnim(
   trackInfo.trackPointList = trackPointList
   trackInfo.pathColsed = false
   trackInfo.speed = speed
-  trackInfo.selfVect = [0.0, -1.0, 0.0]  // 模型的 Y 负方向是前进方向
+  trackInfo.selfVect = [0.0, -1.0, 0.0] // 模型的 Y 负方向是前进方向
 
   BlackHole3D.Entity.setTrackAnim(trackInfo)
 
@@ -350,12 +350,7 @@ function setupVehicleTrackAnim(
 /**
  * 创建单个车辆的动画播放器配置（路径动画）
  */
-function createPathPlayerSet(
-  vehicleId: number,
-  startTime: number,
-  duration: number,
-  dataSetId: string
-): any {
+function createPathPlayerSet(vehicleId: number, startTime: number, duration: number, dataSetId: string): any {
   const playerSetInfo = new BlackHole3D.REPlayerSetInfo()
   playerSetInfo.dataSetId = dataSetId
   playerSetInfo.elemId = vehicleId
@@ -384,12 +379,7 @@ function createPathPlayerSet(
 /**
  * 创建单个车辆的动画播放器配置（车轮动画）
  */
-function createWheelPlayerSet(
-  vehicleId: number,
-  startTime: number,
-  duration: number,
-  dataSetId: string
-): any {
+function createWheelPlayerSet(vehicleId: number, startTime: number, duration: number, dataSetId: string): any {
   const playerSetInfo = new BlackHole3D.REPlayerSetInfo()
   playerSetInfo.dataSetId = dataSetId
   playerSetInfo.elemId = vehicleId
@@ -443,10 +433,7 @@ export function stopVehicleAnimation(vehicleId: number, dataSetId: string): void
 /**
  * 启动单个车辆的动画（保留用于兼容）
  */
-export function startVehicleAnimation(
-  vehicle: VehicleData,
-  applyTransform: (point: TrajectoryPoint) => Point3D
-): void {
+export function startVehicleAnimation(vehicle: VehicleData, applyTransform: (point: TrajectoryPoint) => Point3D): void {
   // 构建轨迹点列表
   const trackPointList = buildTrackPointList(vehicle.trajectory, applyTransform)
 
@@ -457,7 +444,7 @@ export function startVehicleAnimation(
   trackInfo.trackPointList = trackPointList
   trackInfo.pathColsed = false
   trackInfo.speed = DEFAULT_VEHICLE_SPEED
-  trackInfo.selfVect = [0.0, -1.0, 0.0]  // 模型的 Y 负方向是前进方向
+  trackInfo.selfVect = [0.0, -1.0, 0.0] // 模型的 Y 负方向是前进方向
 
   BlackHole3D.Entity.setTrackAnim(trackInfo)
 
@@ -514,7 +501,7 @@ export function stopAllVehicleAnimations(trajectoryData: TrajectoryDataFile): vo
  */
 export function startAllVehicleAnimations(
   trajectoryData: TrajectoryDataFile,
-  applyTransform: (point: TrajectoryPoint) => Point3D
+  applyTransform: (point: TrajectoryPoint) => Point3D,
 ): number {
   const vehiclesToAnimate = filterVehicles(trajectoryData.vehicles)
   const validVehicles = vehiclesToAnimate.filter(v => v.trajectory.length >= 2)
@@ -558,10 +545,12 @@ export function startAllVehicleAnimations(
 
     // 计算该车辆相对于最早时间的启动延迟（秒），并应用时间压缩
     const originalDelayMs = vehicle.trajectory[0].t - earliestStartTime
-    const startTime = (originalDelayMs / 1000) / DEBUG_TIME_SCALE
+    const startTime = originalDelayMs / 1000 / DEBUG_TIME_SCALE
     const endTime = startTime + duration
 
-    debugLog(`车辆 ${vehicle.id}: 启动时间 ${startTime.toFixed(2)}s，持续 ${duration.toFixed(2)}s，结束时间 ${endTime.toFixed(2)}s`)
+    debugLog(
+      `车辆 ${vehicle.id}: 启动时间 ${startTime.toFixed(2)}s，持续 ${duration.toFixed(2)}s，结束时间 ${endTime.toFixed(2)}s`,
+    )
 
     // 添加路径动画播放器
     const pathPlayerSet = createPathPlayerSet(vehicle.id, startTime, duration, vehicle.dataSetId)
@@ -604,7 +593,7 @@ export function startAllVehicleAnimations(
 /**
  * 采样轨迹点 - 每隔 N 个点取一个，减少数据量
  */
-export function sampleTrajectory(trajectory: TrajectoryPoint[], sampleRate: number = 50): TrajectoryPoint[] {
+export function sampleTrajectory(trajectory: TrajectoryPoint[], sampleRate = 50): TrajectoryPoint[] {
   if (trajectory.length <= 2) return trajectory
 
   const sampled: TrajectoryPoint[] = [trajectory[0]] // 起点
@@ -617,4 +606,3 @@ export function sampleTrajectory(trajectory: TrajectoryPoint[], sampleRate: numb
 
   return sampled
 }
-

@@ -75,4 +75,3 @@ export interface TrajectoryDataFile {
   meta: TrajectoryMeta
   vehicles: VehicleData[]
 }
-

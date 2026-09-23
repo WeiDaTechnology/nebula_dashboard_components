@@ -1,6 +1,6 @@
 import ReactECharts from 'echarts-for-react'
 import type React from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
 
@@ -22,14 +22,14 @@ type LeftDetailItem = {
   pileNumber: string // 桩号
   pileLength: string | number // 桩长（m）
   pileDiameter: string | number // 桩径（m）
-  pileTop: number // 桩顶标高
-  pileBottom: number // 桩底标高
+  pileTop: number | null // 桩顶标高
+  pileBottom: number | null // 桩底标高
   cementContent?: string | number // 水泥掺量
   startTime: string // 开始时间
   endTime: string // 结束时间
-  sinkingTime: number // 下沉用时（s）
-  enhanceTime: number // 提升用时（s）
-  constructionTime: number // 施工用时（s）
+  sinkingTime: number | null // 下沉用时（s）
+  enhanceTime: number | null // 提升用时（s）
+  constructionTime: number | null // 施工用时（s）
   current: string | number | null // 着底电流（A）
   speed: string | number | null // 钻杆转速（r/min）
   sinkingSpeed: string | number // 下沉速度（m/min）
@@ -66,13 +66,13 @@ function mapDetailItem(rawData: RawDetailItem): LeftDetailItem {
     pileNumber: rawData.pileNumber || '',
     pileLength: rawData.depth ?? '',
     pileDiameter: rawData.pileDiameter ?? '',
-    pileTop: rawData.pileTop ?? 0,
-    pileBottom: rawData.pileLow ?? 0,
+    pileTop: rawData.pileTop ?? null,
+    pileBottom: rawData.pileLow ?? null,
     startTime: rawData.startTime || '',
     endTime: rawData.endTime || '',
-    sinkingTime: rawData.sinkingTime ?? 0,
-    enhanceTime: rawData.enhanceUse ?? 0,
-    constructionTime: rawData.construction ?? 0,
+    sinkingTime: rawData.sinkingTime ?? null,
+    enhanceTime: rawData.enhanceUse ?? null,
+    constructionTime: rawData.construction ?? null,
     current: rawData.current ?? null,
     speed: rawData.speed ?? null,
     sinkingSpeed: rawData.sinking_iift ?? '',
@@ -178,6 +178,28 @@ function generateMockChartData(): ChartSourceItem[] {
   return chartData
 }
 
+async function requestPileQuery<T>(
+  dataSetUuid: string,
+  params: Record<string, string>,
+  label: string,
+): Promise<{ ok: boolean; rows: T[] }> {
+  try {
+    const response: { data?: T[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+      data: {
+        dataSetUuid,
+        params,
+      },
+    })
+    return {
+      ok: true,
+      rows: Array.isArray(response.data) ? response.data : [],
+    }
+  } catch (error) {
+    console.error(`搅拌桩${label}数据请求失败`, error)
+    return { ok: false, rows: [] }
+  }
+}
+
 async function fetchData(childNodeId: string, dataSetId: string): Promise<dataItem | null> {
   const elementParam: any = await window.core.request('bjgraphicplatform/project/element/getElementParam', {
     data: {
@@ -195,44 +217,65 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<dataIt
     return null
   }
 
-  // 获取左侧详情数据
-  const response: { data: RawDetailItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
-    data: {
-      dataSetUuid: '84a7ce9e3f354233855d99e90d7d35c5',
-      params: {
-        pileNumber: zhanghao,
-      },
-    },
-  })
+  const [detailQuery, chartQuery] = await Promise.all([
+    requestPileQuery<RawDetailItem>('84a7ce9e3f354233855d99e90d7d35c5', { pileNumber: zhanghao }, '详情'),
+    requestPileQuery<ChartSourceItem>('8d1d7c276e4841fe8caea245c38abb55', { pileDriverName: zhanghao }, '图表'),
+  ])
+  const detailRows = detailQuery.rows
+  const chartRows = chartQuery.rows
 
-  // 获取右侧图表数据
-
-  const chartResponse: { data: ChartSourceItem[] } = await window.core.request(
-    'bjgraphicplatform/dataSet/executeQuery',
-    {
-      data: {
-        dataSetUuid: '8d1d7c276e4841fe8caea245c38abb55',
-        params: {
-          pileDriverName: zhanghao,
-        },
-      },
-    },
-  )
-
-  const rawData = response.data?.[0]
-  const foundData = rawData ? mapDetailItem(rawData) : null
-
-  if (!foundData) {
+  if (detailRows.length === 0 && chartRows.length === 0) {
     return null
   }
 
-  // 使用真实图表数据，如果没有则使用模拟数据
-  const chartData = chartResponse.data?.length > 0 ? chartResponse.data : generateMockChartData()
+  const foundData = detailRows[0]
+    ? mapDetailItem(detailRows[0])
+    : {
+        pileNumber: zhanghao,
+        pileLength: '',
+        pileDiameter: '',
+        pileTop: null,
+        pileBottom: null,
+        startTime: '',
+        endTime: '',
+        sinkingTime: null,
+        enhanceTime: null,
+        constructionTime: null,
+        current: null,
+        speed: null,
+        sinkingSpeed: '',
+        increaseSpeed: '',
+        waterAsh: '',
+        instantaneous: '',
+        cumulative: '',
+      }
+
+  let chartData = chartRows
+  if (chartData.length === 0 && chartQuery.ok && detailRows.length > 0) {
+    chartData = generateMockChartData()
+  }
 
   return {
     ...foundData,
     chartData,
   }
+}
+
+let pendingFetch: { key: string; promise: Promise<dataItem | null> } | null = null
+
+function fetchDataShared(childNodeId: string, dataSetId: string): Promise<dataItem | null> {
+  const key = `${dataSetId}:${childNodeId}`
+  if (pendingFetch?.key === key) {
+    return pendingFetch.promise
+  }
+
+  const promise = fetchData(childNodeId, dataSetId).finally(() => {
+    if (pendingFetch?.promise === promise) {
+      pendingFetch = null
+    }
+  })
+  pendingFetch = { key, promise }
+  return promise
 }
 
 const Component: React.FC<ComponentProps> = props => {
@@ -241,6 +284,8 @@ const Component: React.FC<ComponentProps> = props => {
 
   const [internalVisible, setInternalVisible] = useState(false)
   const [stationInfo, setStationInfo] = useState<dataItem | null>(null)
+  const [loading, setLoading] = useState(false)
+  const requestIdRef = useRef(0)
   const [chartsData, setChartsData] = useState<ChartsData>({
     depth: [],
     cumulative: [],
@@ -252,6 +297,8 @@ const Component: React.FC<ComponentProps> = props => {
     if (controlledVisible === undefined) {
       setInternalVisible(false)
     }
+    requestIdRef.current += 1
+    setLoading(false)
     setStationInfo(null)
     onClose?.()
   }
@@ -482,14 +529,31 @@ const Component: React.FC<ComponentProps> = props => {
       const dataSetId = res.dataSetId
       // window.jiaoBanZhuangDatasetId
       if (dataSetId !== (window as any).jiaoBanZhuangDatasetId) return
-      const data: dataItem | null | undefined = await fetchData(childNodeId, dataSetId)
-      console.log('data', data)
 
-      // 如果获取到数据，设置到状态并显示弹窗；否则不显示
-      if (data) {
-        setStationInfo(data)
-        setChartsData(convertChartData(data.chartData || []))
-        setInternalVisible(true)
+      requestIdRef.current += 1
+      const requestId = requestIdRef.current
+      setInternalVisible(true)
+      setLoading(true)
+      setStationInfo(null)
+      setChartsData({ depth: [], cumulative: [] })
+
+      try {
+        const data = await fetchDataShared(childNodeId, dataSetId)
+        console.log('data', data)
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        if (data) {
+          setStationInfo(data)
+          setChartsData(convertChartData(data.chartData || []))
+        }
+      } catch (error) {
+        console.error('fetchData failed', error)
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false)
+        }
       }
     }
 
@@ -525,7 +589,7 @@ const Component: React.FC<ComponentProps> = props => {
           <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
             {/* 标题栏 */}
             <div className={styles.header}>
-              <h2 className={styles.title}>{stationInfo?.pileNumber || title || '/'}</h2>
+              <h2 className={styles.title}>{loading ? '加载中...' : stationInfo?.pileNumber || title || '/'}</h2>
               <div className={styles.rightActions}>
                 <span className={styles.trophyIcon}>🏆</span>
                 <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
@@ -536,100 +600,111 @@ const Component: React.FC<ComponentProps> = props => {
 
             {/* 内容区域 */}
             <div className={styles.content}>
-              <div className={styles.mainLayout}>
-                {/* 左侧数据列表 */}
-                <div className={styles.leftPanel}>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>桩号</span>
-                    <span className={styles.value}>{stationInfo?.pileNumber || '/'}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>桩长（m）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.pileLength, 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>桩径（mm）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.pileDiameter, 'mm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>桩顶标高（m）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.pileTop, 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>桩底标高（m）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.pileBottom, 'm')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>开始时间</span>
-                    <span className={styles.value}>{stationInfo?.startTime || '/'}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>结束时间</span>
-                    <span className={styles.value}>{stationInfo?.endTime || '/'}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>下沉用时（s）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.sinkingTime, 's')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>提升用时（s）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.enhanceTime, 's')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>施工用时（s）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.constructionTime, 's')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>着底电流（A）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.current, 'A')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>钻杆转速（r/min）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.speed, 'r/min')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>下沉速度（m/min）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.sinkingSpeed, 'm/min')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>提升速度（m/min）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.increaseSpeed, 'm/min')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>水灰比</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.waterAsh)}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>水泥浆流量（L/min）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.instantaneous, 'L/min')}</span>
-                  </div>
-                  <div className={styles.dataItem}>
-                    <span className={styles.label}>水泥用量（m³）</span>
-                    <span className={styles.value}>{formatValue(stationInfo?.cumulative, 'm³')}</span>
-                  </div>
+              {loading ? (
+                <div className={styles.loadingWrapper}>
+                  <div className={styles.loadingSpinner} />
+                  <span className={styles.loadingText}>数据加载中...</span>
                 </div>
-
-                {/* 右侧图表区域 */}
-                <div className={styles.rightPanel}>
-                  {/* 折线图：深度变化 */}
-                  <div className={styles.chartContainer}>
-                    <ReactECharts
-                      option={depthChartOption}
-                      opts={{ renderer: 'canvas' }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
+              ) : stationInfo ? (
+                <div className={styles.mainLayout}>
+                  {/* 左侧数据列表 */}
+                  <div className={styles.leftPanel}>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>桩号</span>
+                      <span className={styles.value}>{stationInfo?.pileNumber || '/'}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>桩长（m）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.pileLength, 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>桩径（mm）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.pileDiameter, 'mm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>桩顶标高（m）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.pileTop, 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>桩底标高（m）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.pileBottom, 'm')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>开始时间</span>
+                      <span className={styles.value}>{stationInfo?.startTime || '/'}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>结束时间</span>
+                      <span className={styles.value}>{stationInfo?.endTime || '/'}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>下沉用时（s）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.sinkingTime, 's')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>提升用时（s）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.enhanceTime, 's')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>施工用时（s）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.constructionTime, 's')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>着底电流（A）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.current, 'A')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>钻杆转速（r/min）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.speed, 'r/min')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>下沉速度（m/min）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.sinkingSpeed, 'm/min')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>提升速度（m/min）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.increaseSpeed, 'm/min')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>水灰比</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.waterAsh)}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>水泥浆流量（L/min）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.instantaneous, 'L/min')}</span>
+                    </div>
+                    <div className={styles.dataItem}>
+                      <span className={styles.label}>水泥用量（m³）</span>
+                      <span className={styles.value}>{formatValue(stationInfo?.cumulative, 'm³')}</span>
+                    </div>
                   </div>
 
-                  {/* 柱状图：累计浆量 */}
-                  <div className={styles.chartContainer}>
-                    <ReactECharts
-                      option={cumulativeChartOption}
-                      opts={{ renderer: 'canvas' }}
-                      style={{ height: '100%', width: '100%' }}
-                    />
+                  {/* 右侧图表区域 */}
+                  <div className={styles.rightPanel}>
+                    {/* 折线图：深度变化 */}
+                    <div className={styles.chartContainer}>
+                      <ReactECharts
+                        option={depthChartOption}
+                        opts={{ renderer: 'canvas' }}
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
+
+                    {/* 柱状图：累计浆量 */}
+                    <div className={styles.chartContainer}>
+                      <ReactECharts
+                        option={cumulativeChartOption}
+                        opts={{ renderer: 'canvas' }}
+                        style={{ height: '100%', width: '100%' }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className={styles.loadingWrapper}>
+                  <span className={styles.loadingText}>暂无数据</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

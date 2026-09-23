@@ -1,8 +1,7 @@
 import { createStyles } from 'antd-style'
 
-const useStyles = createStyles(({ css, token }) => {
-  return {
-    container: css`
+const useStyles = createStyles(({ css, token }) => ({
+  container: css`
       display: flex;
       align-items: center;
       justify-content: center;
@@ -10,30 +9,30 @@ const useStyles = createStyles(({ css, token }) => {
       height: 100%;
       padding: 20px;
     `,
-    content: css`
+  content: css`
       text-align: center;
       width: 100%;
       max-width: 500px;
     `,
-    title: css`
+  title: css`
       font-size: 1.5rem;
       font-weight: 700;
       color: ${token.colorPrimary};
       margin-bottom: 0.5rem;
     `,
-    description: css`
+  description: css`
       color: ${token.colorTextSecondary};
       margin-bottom: 1.5rem;
       font-size: 14px;
     `,
-    buttonGroup: css`
+  buttonGroup: css`
       display: flex;
       justify-content: center;
       gap: 16px;
       margin-top: 20px;
       flex-wrap: wrap;
     `,
-    button: css`
+  button: css`
       padding: 10px 24px;
       font-size: 14px;
       font-weight: 500;
@@ -61,7 +60,7 @@ const useStyles = createStyles(({ css, token }) => {
         box-shadow: none;
       }
     `,
-    buttonActive: css`
+  buttonActive: css`
       background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
       box-shadow: 0 4px 15px rgba(245, 87, 108, 0.5);
       animation: pulse 1.5s ease-in-out infinite;
@@ -75,12 +74,12 @@ const useStyles = createStyles(({ css, token }) => {
         }
       }
     `,
-    trackInfo: css`
+  trackInfo: css`
       margin-top: 16px;
       font-size: 13px;
       color: ${token.colorTextTertiary};
     `,
-    infoBox: css`
+  infoBox: css`
       margin-top: 24px;
       padding: 16px;
       background: ${token.colorBgContainer};
@@ -93,7 +92,6 @@ const useStyles = createStyles(({ css, token }) => {
         color: ${token.colorTextSecondary};
       }
     `,
-  }
-})
+}))
 
 export default useStyles

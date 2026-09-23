@@ -75,18 +75,18 @@ function groupByVehicleId(sortedData) {
       }
 
       vehicleMap.get(id).trajectory.push({
-        t: timestamp,   // 简化字段名减小文件体积
-        xo: xOrig,      // xOrig
-        yo: yOrig,      // yOrig
+        t: timestamp, // 简化字段名减小文件体积
+        xo: xOrig, // xOrig
+        yo: yOrig, // yOrig
         zo: zOrig || 0, // zOrig
         x,
         y,
         z: z || 0,
-        a: angle,       // angle
-        s: speed,       // speed
-        ex: eulerX,     // eulerX
-        ey: eulerY,     // eulerY
-        ez: eulerZ,     // eulerZ
+        a: angle, // angle
+        s: speed, // speed
+        ex: eulerX, // eulerX
+        ey: eulerY, // eulerY
+        ez: eulerZ, // eulerZ
       })
     }
   }
@@ -111,14 +111,14 @@ function generateStats(vehicles) {
   const vehicleIds = vehicles.map(v => v.id)
 
   // 计算坐标范围
-  let minXOrig = Infinity,
-    maxXOrig = -Infinity
-  let minYOrig = Infinity,
-    maxYOrig = -Infinity
-  let minX = Infinity,
-    maxX = -Infinity
-  let minY = Infinity,
-    maxY = -Infinity
+  let minXOrig = Number.POSITIVE_INFINITY,
+    maxXOrig = Number.NEGATIVE_INFINITY
+  let minYOrig = Number.POSITIVE_INFINITY,
+    maxYOrig = Number.NEGATIVE_INFINITY
+  let minX = Number.POSITIVE_INFINITY,
+    maxX = Number.NEGATIVE_INFINITY
+  let minY = Number.POSITIVE_INFINITY,
+    maxY = Number.NEGATIVE_INFINITY
 
   for (const v of vehicles) {
     for (const p of v.trajectory) {
@@ -198,10 +198,10 @@ function main() {
   // 5. 生成 JSON 输出
   console.log('\n5. 生成 JSON 文件...')
   const jsonOutput = generateJsonOutput(vehicles, stats)
-  
+
   // 写入 JSON 文件（不格式化，减小体积）
   fs.writeFileSync(outputFile, JSON.stringify(jsonOutput), 'utf-8')
-  
+
   // 计算文件大小
   const fileSizeBytes = fs.statSync(outputFile).size
   const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2)

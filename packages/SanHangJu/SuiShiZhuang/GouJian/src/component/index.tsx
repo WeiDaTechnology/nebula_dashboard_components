@@ -142,6 +142,7 @@ const DEVICE_DATASET_MAP: Record<number, string> = {
   2: 'f7d110b01e114b76adbee5b1a3b3e9e4',
   3: 'a32e9cd0ab3244eb94fa61e6ce5fa623',
   4: 'fe8d03a9145e4df69a1f402f1a5cecb9',
+  5: 'abdcb1d6e7c049ed9277bc3f47d345d2',
 }
 
 interface DeviceOption {
@@ -173,11 +174,14 @@ function groupChartDataByDevice(chartData: ChartDataItem[] = []): Record<string,
 
 function getDeviceOptions(groups: Record<string, ChartDataItem[]>): DeviceOption[] {
   return Object.keys(groups)
-    .map(tableName => ({
-      tableName,
-      deviceNum: getDeviceNumberFromTable(tableName),
-      label: getDeviceLabel(getDeviceNumberFromTable(tableName)),
-    }))
+    .map(tableName => {
+      const deviceNum = getDeviceNumberFromTable(tableName)
+      return {
+        tableName,
+        deviceNum,
+        label: getDeviceLabel(deviceNum),
+      }
+    })
     .sort((a, b) => a.deviceNum - b.deviceNum)
 }
 // 将API返回的图表数据转换为ECharts需要的格式
@@ -281,16 +285,22 @@ async function fetchStationDataByDevice(zhuanghao: string, deviceNum: number): P
     return null
   }
 
-  const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
-    data: {
-      dataSetUuid,
-      params: {
-        zhaunghao: zhuanghao,
+  try {
+    const response: { data: dataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
+      data: {
+        dataSetUuid,
+        params: {
+          // 详情数据集的参数名是后端配置的 zhaunghao，不能改成 zhuanghao
+          zhaunghao: zhuanghao,
+        },
       },
-    },
-  })
-
-  return response.data?.[0] ?? null
+    })
+    const rows = Array.isArray(response.data) ? response.data : []
+    return rows[0] ?? null
+  } catch (error) {
+    console.error('碎石桩详情数据请求失败', error)
+    return null
+  }
 }
 
 interface FetchDataResult {
@@ -299,6 +309,7 @@ interface FetchDataResult {
   chartDataGroups: Record<string, ChartDataItem[]>
   deviceOptions: DeviceOption[]
   selectedDeviceTable: string
+  activeChartData: ChartDataItem[]
 }
 
 async function fetchData(childNodeId: string, dataSetId: string): Promise<FetchDataResult | null> {
@@ -318,32 +329,61 @@ async function fetchData(childNodeId: string, dataSetId: string): Promise<FetchD
     return null
   }
 
-  const chartResponse: { data: ChartDataItem[] } = await window.core.request('bjgraphicplatform/dataSet/executeQuery', {
-    data: {
-      dataSetUuid: '3d9098f1c0694abaa402514ce53dbd56',
-      params: {
-        zhuanghao,
+  let chartRows: ChartDataItem[] = []
+  try {
+    const chartResponse: { data: ChartDataItem[] } = await window.core.request(
+      'bjgraphicplatform/dataSet/executeQuery',
+      {
+        data: {
+          dataSetUuid: '3d9098f1c0694abaa402514ce53dbd56',
+          params: {
+            zhuanghao,
+          },
+        },
       },
-    },
-  })
-
-  const chartDataGroups = groupChartDataByDevice(chartResponse.data ?? [])
-  const deviceOptions = getDeviceOptions(chartDataGroups)
-
-  if (deviceOptions.length === 0) {
-    return null
+    )
+    chartRows = Array.isArray(chartResponse.data) ? chartResponse.data : []
+  } catch (error) {
+    console.error('碎石桩图表数据请求失败', error)
   }
 
-  const defaultDevice = deviceOptions[0]
-  const stationInfo = await fetchStationDataByDevice(zhuanghao, defaultDevice.deviceNum)
+  const chartDataGroups = groupChartDataByDevice(chartRows)
+  const deviceOptions = getDeviceOptions(chartDataGroups)
+  const selectedOption = deviceOptions[0]
+  const selectedDeviceTable = selectedOption?.tableName ?? ''
+  const stationInfo = selectedOption ? await fetchStationDataByDevice(zhuanghao, selectedOption.deviceNum) : null
+  const groupedChartData = selectedDeviceTable ? chartDataGroups[selectedDeviceTable] : undefined
+  const activeChartData = groupedChartData?.length ? groupedChartData : chartRows
+
+  if (!stationInfo && activeChartData.length === 0) {
+    return null
+  }
 
   return {
     zhuanghao,
     stationInfo,
     chartDataGroups,
     deviceOptions,
-    selectedDeviceTable: defaultDevice.tableName,
+    selectedDeviceTable,
+    activeChartData,
   }
+}
+
+let pendingFetch: { key: string; promise: Promise<FetchDataResult | null> } | null = null
+
+function fetchDataShared(childNodeId: string, dataSetId: string): Promise<FetchDataResult | null> {
+  const key = `${dataSetId}:${childNodeId}`
+  if (pendingFetch?.key === key) {
+    return pendingFetch.promise
+  }
+
+  const promise = fetchData(childNodeId, dataSetId).finally(() => {
+    if (pendingFetch?.promise === promise) {
+      pendingFetch = null
+    }
+  })
+  pendingFetch = { key, promise }
+  return promise
 }
 
 const Component: React.FC<ComponentProps> = props => {
@@ -627,7 +667,7 @@ const Component: React.FC<ComponentProps> = props => {
       setChartsData({ depth: [], volume: [], current: [] })
 
       try {
-        const data = await fetchData(childNodeId, dataSetId)
+        const data = await fetchDataShared(childNodeId, dataSetId)
         console.log('data', data)
 
         if (requestId !== requestIdRef.current) {
@@ -640,7 +680,7 @@ const Component: React.FC<ComponentProps> = props => {
           setSelectedDeviceTable(data.selectedDeviceTable)
           setChartDataGroups(data.chartDataGroups)
           setStationInfo(data.stationInfo)
-          setChartsData(convertChartData(data.chartDataGroups[data.selectedDeviceTable]))
+          setChartsData(convertChartData(data.activeChartData))
         } else {
           setInternalVisible(false)
         }
@@ -659,7 +699,7 @@ const Component: React.FC<ComponentProps> = props => {
     document.addEventListener('RESystemSelElement', RESystemSelElement) //鼠标探测模型事件（左键单击和右键单击）
     // 组件卸载时自动取消监听
     return () => {
-      document.removeEventListener('RESystemSelShpElement', RESystemSelElement)
+      document.removeEventListener('RESystemSelElement', RESystemSelElement)
     }
   }, [])
   return (

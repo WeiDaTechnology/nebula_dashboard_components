@@ -8,20 +8,20 @@ import {
   hideAllFilteredVehicles,
   logDebugVehicleTrajectory,
   startAllVehicleAnimations,
-  stopAllVehicleAnimations
+  stopAllVehicleAnimations,
 } from './animationUtils'
 import useStyles from './styles'
 import type { TrajectoryDataFile, VehicleData } from './trajectoryTypes'
 import {
-  type Point3D,
-  type TransformParams,
-  DEFAULT_TRANSFORM_PARAMS,
-  FIXED_Z,
   applyTransform,
   calculateOptimalTransform,
   calculateRectangleFrom3Points,
   calculateTrajectoryBoundingBox,
-  calculateTrajectoryOBB
+  calculateTrajectoryOBB,
+  DEFAULT_TRANSFORM_PARAMS,
+  FIXED_Z,
+  type Point3D,
+  type TransformParams,
 } from './transformUtils'
 
 declare const BlackHole3D: any
@@ -31,18 +31,18 @@ const TRAJECTORY_DATA_URL = 'http://127.0.0.1:5010/trajectoryData.json'
 
 // 预设的区域包围盒（旋转矩形，用于轨迹映射）
 const PRESET_REGION_POINTS: Point3D[] = [
-  [187.25, 711.84, FIXED_Z],    // A
-  [-895.09, -200.23, FIXED_Z],  // B
-  [-562.06, -595.43, FIXED_Z],  // C
-  [520.28, 316.64, FIXED_Z]     // D
+  [187.25, 711.84, FIXED_Z], // A
+  [-895.09, -200.23, FIXED_Z], // B
+  [-562.06, -595.43, FIXED_Z], // C
+  [520.28, 316.64, FIXED_Z], // D
 ]
 
 // 预设矩形坐标（与 PRESET_REGION_POINTS 相同）
 const PRESET_RECTANGLE_POINTS: Point3D[] = [
-  [187.25, 711.84, FIXED_Z],    // A
-  [-895.09, -200.23, FIXED_Z],  // B
-  [-562.06, -595.43, FIXED_Z],  // C
-  [520.28, 316.64, FIXED_Z]     // D
+  [187.25, 711.84, FIXED_Z], // A
+  [-895.09, -200.23, FIXED_Z], // B
+  [-562.06, -595.43, FIXED_Z], // C
+  [520.28, 316.64, FIXED_Z], // D
 ]
 
 interface ComponentProps extends ContainerProps {
@@ -93,9 +93,10 @@ const Component: React.FC<ComponentProps> = props => {
   /**
    * 应用坐标转换（包装 transformUtils 的函数，绑定当前参数）
    */
-  const applyTransformWithParams = useCallback((point: Parameters<typeof applyTransform>[0]): Point3D => {
-    return applyTransform(point, transformParams)
-  }, [transformParams])
+  const applyTransformWithParams = useCallback(
+    (point: Parameters<typeof applyTransform>[0]): Point3D => applyTransform(point, transformParams),
+    [transformParams],
+  )
 
   /**
    * 加载轨迹数据
@@ -125,7 +126,7 @@ const Component: React.FC<ComponentProps> = props => {
       setTransformParams(params)
       setRegionPoints(PRESET_REGION_POINTS)
 
-      const rotationDeg = (params.rotation * 180 / Math.PI).toFixed(1)
+      const rotationDeg = ((params.rotation * 180) / Math.PI).toFixed(1)
       console.log('=== 转换参数 ===')
       console.log('缩放:', params.scale)
       console.log('旋转:', rotationDeg, '度')
@@ -134,7 +135,9 @@ const Component: React.FC<ComponentProps> = props => {
       console.log('Z 偏移:', params.offsetZ)
       console.log('================')
 
-      setLoadingStatus(`已加载 ${data.meta.totalVehicles} 辆车，缩放: ${params.scale.toFixed(3)}, 旋转: ${rotationDeg}°`)
+      setLoadingStatus(
+        `已加载 ${data.meta.totalVehicles} 辆车，缩放: ${params.scale.toFixed(3)}, 旋转: ${rotationDeg}°`,
+      )
     } catch (error) {
       console.error('加载轨迹数据失败:', error)
       setLoadingStatus('加载失败')
@@ -222,7 +225,7 @@ const Component: React.FC<ComponentProps> = props => {
    * 绘制轨迹的旋转包围盒（OBB）
    */
   const drawTrajectoryOBB = useCallback(() => {
-    if (!trajectoryData || !transformParams.configured) {
+    if (!(trajectoryData && transformParams.configured)) {
       console.warn('需要先加载轨迹数据')
       return
     }
@@ -237,9 +240,18 @@ const Component: React.FC<ComponentProps> = props => {
     // 将 OBB 角点应用坐标转换
     const transformedCorners: Point3D[] = obbCorners.map(corner => {
       const point = {
-        t: 0, xo: 0, yo: 0, zo: 0,
-        x: corner[0], y: corner[1], z: 0,
-        a: 0, s: 0, ex: 0, ey: 0, ez: 0
+        t: 0,
+        xo: 0,
+        yo: 0,
+        zo: 0,
+        x: corner[0],
+        y: corner[1],
+        z: 0,
+        a: 0,
+        s: 0,
+        ex: 0,
+        ey: 0,
+        ez: 0,
       }
       return applyTransformWithParams(point)
     })
@@ -407,7 +419,7 @@ const Component: React.FC<ComponentProps> = props => {
     const params = calculateOptimalTransform(regionPoints, trajectoryData)
     setTransformParams(params)
 
-    const rotationDeg = (params.rotation * 180 / Math.PI).toFixed(1)
+    const rotationDeg = ((params.rotation * 180) / Math.PI).toFixed(1)
     console.log('转换参数:', params)
     setLoadingStatus(`缩放: ${params.scale.toFixed(3)}, 旋转: ${rotationDeg}°`)
   }, [trajectoryData, regionPoints])
@@ -416,7 +428,7 @@ const Component: React.FC<ComponentProps> = props => {
    * 添加所有车辆实体
    */
   const addAllVehicleEntities = useCallback(() => {
-    if (!trajectoryData || !transformParams.configured) return
+    if (!(trajectoryData && transformParams.configured)) return
 
     if (!BlackHole3D?.Entity) {
       console.warn('BlackHole3D.Entity 未就绪')
@@ -434,8 +446,7 @@ const Component: React.FC<ComponentProps> = props => {
       // 打印调试车辆的原始轨迹数据
       logDebugVehicleTrajectory(vehiclesToAdd)
       vehiclesToAdd.forEach((vehicle: VehicleData) => {
-
-        const num = Math.floor(Math.random() * 6) + 1;
+        const num = Math.floor(Math.random() * 6) + 1
         const typeNamesHuoche = BlackHole3D.Entity.getAllTypeNames('huoche' + num)
 
         if (!typeNamesHuoche?.length) {
@@ -476,7 +487,9 @@ const Component: React.FC<ComponentProps> = props => {
     } catch (error) {
       console.error('添加车辆失败:', error)
       setLoadingStatus('添加车辆失败')
-      try { BlackHole3D.Entity.exitEditMode() } catch { }
+      try {
+        BlackHole3D.Entity.exitEditMode()
+      } catch {}
     }
   }, [trajectoryData, transformParams, applyTransformWithParams])
 
@@ -484,7 +497,7 @@ const Component: React.FC<ComponentProps> = props => {
    * 开始/停止轨迹动画
    */
   const toggleAnimation = useCallback(() => {
-    if (!trajectoryData || !entitiesAdded) return
+    if (!(trajectoryData && entitiesAdded)) return
 
     if (isAnimating) {
       // 停止所有动画
@@ -506,35 +519,66 @@ const Component: React.FC<ComponentProps> = props => {
   // 初始化
   useEffect(() => {
     function handleDataSetLoadFinish() {
-      if (!BlackHole3D.Model.getAllDataSetId().includes('huoche1','huoche2','huoche3','huoche4','huoche5','huoche6','huoche7','huoche8')) {
-        setLoadingStatus('加载车辆模型...')
-        BlackHole3D.Model.loadDataSet([{
-          dataSetId: 'huoche1',
-          resourcesAddress: 'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a19bfc351a3b69a8bb7ea6a375ed27a',
-        },{
-          dataSetId: 'huoche2',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d00b2561c89fcb9c7f5531040a'
-        },{
-          dataSetId: 'huoche3',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d007855cdf01e0b60236fb2777'
-        },{
-          dataSetId: 'huoche4444',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82'
-        },{
-          dataSetId: 'huoche555',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14155d10dcf501e9b7b3fc96cbd601'
-        },{
-          dataSetId: 'huoche4',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14154f0a1f97bd4bc7c27b5ff7a246'
-        },{
-          dataSetId: 'huoche5',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a140fe1fbc5c6b9fef90301e079f99b'
-        },{
-          dataSetId: 'huoche6',
-          resourcesAddress: 'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a140fddc50f0ad89760ae102524c42b'
-        }], false)
-      } else {
+      if (
+        BlackHole3D.Model.getAllDataSetId().includes(
+          'huoche1',
+          'huoche2',
+          'huoche3',
+          'huoche4',
+          'huoche5',
+          'huoche6',
+          'huoche7',
+          'huoche8',
+        )
+      ) {
         setLoadingStatus('引擎就绪')
+      } else {
+        setLoadingStatus('加载车辆模型...')
+        BlackHole3D.Model.loadDataSet(
+          [
+            {
+              dataSetId: 'huoche1',
+              resourcesAddress:
+                'https://engine3.bjblackhole.com/engineweb/api/autoconvert/EngineRes/RequestEngineRes?dir=url_res04&path=3a19bfc351a3b69a8bb7ea6a375ed27a',
+            },
+            {
+              dataSetId: 'huoche2',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d00b2561c89fcb9c7f5531040a',
+            },
+            {
+              dataSetId: 'huoche3',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d007855cdf01e0b60236fb2777',
+            },
+            {
+              dataSetId: 'huoche4444',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a1418d005a03312f9590ea077c9fa82',
+            },
+            {
+              dataSetId: 'huoche555',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14155d10dcf501e9b7b3fc96cbd601',
+            },
+            {
+              dataSetId: 'huoche4',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a14154f0a1f97bd4bc7c27b5ff7a246',
+            },
+            {
+              dataSetId: 'huoche5',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a140fe1fbc5c6b9fef90301e079f99b',
+            },
+            {
+              dataSetId: 'huoche6',
+              resourcesAddress:
+                'https://enginegraph.weidax.com/engineweb/blackhole3D/EngineRes/RequestEngineRes?dir=url_res12&path=3a140fddc50f0ad89760ae102524c42b',
+            },
+          ],
+          false,
+        )
       }
     }
 
@@ -558,36 +602,32 @@ const Component: React.FC<ComponentProps> = props => {
         <div className={styles.buttonGroup}>
           <button
             className={styles.button}
-            type="button"
-            onClick={loadTrajectoryData}
             disabled={isLoading || !!trajectoryData}
+            onClick={loadTrajectoryData}
+            type="button"
           >
             {trajectoryData ? '✓ 数据已加载' : isLoading ? '加载中...' : '1. 加载轨迹数据'}
           </button>
 
-          <button
-            className={styles.button}
-            type="button"
-            onClick={drawPredefinedRectangle}
-          >
+          <button className={styles.button} onClick={drawPredefinedRectangle} type="button">
             绘制预设矩形
           </button>
 
           <button
             className={styles.button}
-            type="button"
+            disabled={!(trajectoryData && transformParams.configured)}
             onClick={drawTrajectoryOBB}
-            disabled={!trajectoryData || !transformParams.configured}
             style={{ backgroundColor: '#00bfff' }}
+            type="button"
           >
             绘制轨迹包围盒
           </button>
 
           <button
             className={styles.button}
-            type="button"
             onClick={toggleDrawRectangle}
             style={{ backgroundColor: isDrawingRectangle ? '#ff6b6b' : undefined }}
+            type="button"
           >
             {isDrawingRectangle ? '取消打点' : '3点绘制矩形'}
           </button>
@@ -596,21 +636,11 @@ const Component: React.FC<ComponentProps> = props => {
         {/* 第二步：添加车辆并播放 */}
         {transformParams.configured && (
           <div className={styles.buttonGroup}>
-            <button
-              className={styles.button}
-              type="button"
-              onClick={addAllVehicleEntities}
-              disabled={entitiesAdded}
-            >
+            <button className={styles.button} disabled={entitiesAdded} onClick={addAllVehicleEntities} type="button">
               {entitiesAdded ? '✓ 车辆已添加' : '2. 添加车辆'}
             </button>
 
-            <button
-              className={styles.button}
-              type="button"
-              onClick={toggleAnimation}
-              disabled={!entitiesAdded}
-            >
+            <button className={styles.button} disabled={!entitiesAdded} onClick={toggleAnimation} type="button">
               {isAnimating ? '停止动画' : '3. 开始动画'}
             </button>
           </div>
@@ -643,11 +673,13 @@ const Component: React.FC<ComponentProps> = props => {
         {/* 信息展示 */}
         {trajectoryData && (
           <div className={styles.infoBox}>
-            <p>车辆: {trajectoryData.meta.totalVehicles} | 轨迹点: {trajectoryData.meta.totalPoints.toLocaleString()}</p>
+            <p>
+              车辆: {trajectoryData.meta.totalVehicles} | 轨迹点: {trajectoryData.meta.totalPoints.toLocaleString()}
+            </p>
             {transformParams.configured && (
               <p>
-                缩放: {transformParams.scale.toFixed(4)} |
-                旋转: {(transformParams.rotation * 180 / Math.PI).toFixed(1)}°
+                缩放: {transformParams.scale.toFixed(4)} | 旋转:{' '}
+                {((transformParams.rotation * 180) / Math.PI).toFixed(1)}°
               </p>
             )}
           </div>

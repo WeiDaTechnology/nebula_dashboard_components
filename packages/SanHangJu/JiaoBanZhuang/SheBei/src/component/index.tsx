@@ -1,5 +1,5 @@
 import type React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ContainerProps } from '..'
 import useStyles from './styles'
 
@@ -141,6 +141,10 @@ const Component: React.FC<ComponentProps> = props => {
   const [internalVisible, setInternalVisible] = useState(false)
   const [stationInfo, setStationInfo] = useState<DataItem | null>(null)
   const [connectionState, setConnectionState] = useState<number>(CONNECTION_STATE.UNKNOWN)
+  const [anchorTitle, setAnchorTitle] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [empty, setEmpty] = useState(false)
+  const requestIdRef = useRef(0)
 
   // 优先显示传入的数据，否则显示接口获取的数据
   const currentData = data || stationInfo
@@ -148,7 +152,7 @@ const Component: React.FC<ComponentProps> = props => {
   // 状态处理：使用接口返回的连接状态
   const statusText = getConnectionStatusText(connectionState)
   const statusColor = getConnectionStatusColor(connectionState)
-  const titleText = currentData?.deviceName || title
+  const titleText = currentData?.deviceName || anchorTitle || title
 
   const visible = controlledVisible !== undefined ? controlledVisible : internalVisible
 
@@ -156,6 +160,11 @@ const Component: React.FC<ComponentProps> = props => {
     if (controlledVisible === undefined) {
       setInternalVisible(false)
     }
+    requestIdRef.current += 1
+    setLoading(false)
+    setEmpty(false)
+    setAnchorTitle('')
+    setConnectionState(CONNECTION_STATE.UNKNOWN)
     setStationInfo(null)
     onClose?.()
   }
@@ -173,20 +182,33 @@ const Component: React.FC<ComponentProps> = props => {
 
   // 现场模式：监听三维场景选中事件，按设备号匹配数据
   useEffect(() => {
+    const anchorSelectEvent = 'RESystemSelShpElement'
     const handler = async () => {
-      const element = BlackHole3D?.Probe?.getCurCombProbeRet().elemId
+      const element = BlackHole3D?.Probe?.getCurCombProbeRet()?.elemId
       if (
-        !BlackHole3D.Anchor.getAllAnc()
-          .map((item: any) => item.ancName)
-          .includes(element)
-      )
+        !(
+          element &&
+          BlackHole3D.Anchor.getAllAnc()
+            .map((item: any) => item.ancName)
+            .includes(element)
+        )
+      ) {
         return
+      }
       const ancData = BlackHole3D.Anchor.getAnc(element)
       // textInfo "2#搅拌桩"
-      if (!ancData.textInfo.startsWith('桩')) return
+      if (!ancData?.textInfo?.startsWith('桩')) return
+
+      requestIdRef.current += 1
+      const requestId = requestIdRef.current
+      setAnchorTitle(ancData.textInfo)
+      setStationInfo(null)
+      setEmpty(false)
+      setConnectionState(CONNECTION_STATE.UNKNOWN)
+      setLoading(true)
+      setInternalVisible(true)
 
       try {
-        // 请求接口数据
         const response: { data: BackendDataItem[] } = await window.core.request(
           'bjgraphicplatform/dataSet/executeQuery',
           {
@@ -209,13 +231,13 @@ const Component: React.FC<ComponentProps> = props => {
             },
           },
         )
+        if (requestId !== requestIdRef.current) return
 
-        const backendData = response.data?.[0]
-        const statusData = statusResponse.data?.[0]
+        const backendData = Array.isArray(response.data) ? response.data[0] : undefined
+        const statusData = Array.isArray(statusResponse.data) ? statusResponse.data[0] : undefined
         console.log('搅拌桩接口返回数据:', backendData)
         console.log('连接状态接口返回数据:', statusData)
 
-        // 更新连接状态
         if (statusData?.connection_state !== undefined) {
           setConnectionState(statusData.connection_state)
         } else {
@@ -223,25 +245,31 @@ const Component: React.FC<ComponentProps> = props => {
         }
 
         if (backendData) {
-          // 转换后端数据为前端格式
           const currentDeviceData = transformBackendData(backendData)
-          // 将 ancData.textInfo 作为设备名称存入
           currentDeviceData.deviceName = ancData.textInfo
           setStationInfo(currentDeviceData)
-          setInternalVisible(true)
+          setEmpty(false)
         } else {
-          console.warn(`未找到桩机${ancData.textInfo}的数据`)
+          setStationInfo(null)
+          setEmpty(true)
         }
       } catch (error) {
         console.error('获取设备数据失败 >>>> ', error)
+        if (requestId === requestIdRef.current) {
+          setStationInfo(null)
+          setEmpty(true)
+        }
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setLoading(false)
+        }
       }
     }
 
-    document.addEventListener('RESystemSelShpElement', handler)
+    document.addEventListener(anchorSelectEvent, handler)
 
-    // 组件卸载时自动取消监听
     return () => {
-      document.removeEventListener('RESystemSelShpElement', handler)
+      document.removeEventListener(anchorSelectEvent, handler)
     }
   }, [])
   const rows = [
@@ -282,11 +310,15 @@ const Component: React.FC<ComponentProps> = props => {
         <div className={styles.modalOverlay} onClick={handleClose}>
           <div className={styles.modalContainer} onClick={e => e.stopPropagation()}>
             <div className={styles.header}>
-              <div className={styles.statusIndicator}>
-                <span className={styles.statusDot} style={{ backgroundColor: statusColor }} />
-                <span className={styles.statusText}>{statusText}</span>
-              </div>
-              <h2 className={styles.title}>{titleText}</h2>
+              {!loading && stationInfo ? (
+                <div className={styles.statusIndicator}>
+                  <span className={styles.statusDot} style={{ backgroundColor: statusColor }} />
+                  <span className={styles.statusText}>{statusText}</span>
+                </div>
+              ) : (
+                <div className={styles.statusIndicator} />
+              )}
+              <h2 className={styles.title}>{loading ? '加载中...' : titleText}</h2>
               <div className={styles.rightActions}>
                 <span className={styles.trophyIcon}>🏆</span>
                 <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
@@ -296,14 +328,25 @@ const Component: React.FC<ComponentProps> = props => {
             </div>
 
             <div className={styles.content}>
-              <div className={styles.dataGrid}>
-                {rows.map(item => (
-                  <div className={styles.dataItem} key={item.label}>
-                    <span className={styles.label}>{item.label}</span>
-                    <span className={styles.value}>{formatValue(item.value, item.unit)}</span>
-                  </div>
-                ))}
-              </div>
+              {loading ? (
+                <div className={styles.loadingWrapper}>
+                  <div className={styles.loadingSpinner} />
+                  <span className={styles.loadingText}>数据加载中...</span>
+                </div>
+              ) : empty ? (
+                <div className={styles.loadingWrapper}>
+                  <span className={styles.loadingText}>暂无数据</span>
+                </div>
+              ) : (
+                <div className={styles.dataGrid}>
+                  {rows.map(item => (
+                    <div className={styles.dataItem} key={item.label}>
+                      <span className={styles.label}>{item.label}</span>
+                      <span className={styles.value}>{formatValue(item.value, item.unit)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
