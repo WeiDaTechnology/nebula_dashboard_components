@@ -115,12 +115,6 @@ const useStyles = createStyles(({ cx, css, prefixCls, token, responsive }) => {
       align-items: center;
       gap: 5px;
     `,
-    trophyIcon: css`
-      font-size: 14px;
-      line-height: 1;
-      filter: drop-shadow(0 0 1px rgba(255, 215, 0, 0.5));
-      user-select: none;
-    `,
     closeButton: css`
       background: transparent;
       border: none;

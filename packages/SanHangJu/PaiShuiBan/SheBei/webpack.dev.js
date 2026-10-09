@@ -35,7 +35,7 @@ module.exports = {
       },
 
   devServer: {
-    port: 5010,
+    port: 5011,
     host: '0.0.0.0',
     allowedHosts: 'all',
     headers: {

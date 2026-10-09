@@ -744,7 +744,6 @@ const Component: React.FC<ComponentProps> = props => {
               )}
               <h2 className={styles.title}>{loading ? '加载中...' : stationInfo?.['桩号'] || zhuanghao || '/'}</h2>
               <div className={styles.rightActions}>
-                <span className={styles.trophyIcon}>🏆</span>
                 <button aria-label="关闭" className={styles.closeButton} onClick={handleClose} type="button">
                   ×
                 </button>
